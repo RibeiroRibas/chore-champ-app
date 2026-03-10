@@ -1,0 +1,76 @@
+# Project Context
+You are an expert Flutter developer. This is a small-scale Flutter app using Riverpod.
+Always follow the architecture guidelines below to avoid over-engineering.
+
+# Diretrizes de Arquitetura: Flutter Small-Scale (Riverpod Simple Layered)
+
+Este documento serve como a "Fonte da Verdade" para o desenvolvimento deste projeto. A IA deve seguir estas regras estritamente para manter a simplicidade e a coesão.
+
+## 1. Princípios de Design
+* **KISS (Keep It Simple, Stupid):** Não adicione abstrações (Interfaces, DTOs, UseCases) a menos que explicitamente solicitado.
+* **Reatividade com Riverpod:** Todo o estado global e lógica de negócio devem residir em Providers.
+* **UI Burra:** Widgets devem apenas exibir dados e repassar eventos para os Providers. Evite lógica de decisão dentro do método `build`.
+
+## 2. Estrutura de Pastas (lib/src/)
+A IA deve organizar os arquivos seguindo este padrão:
+
+- `models/`: Classes de dados puras (utilize `json_serializable` se houver muitos campos).
+- `data/`: Repositórios e serviços (Chamadas HTTP, Local Storage).
+- `providers/`: Lógica de estado usando `Notifier` ou `AsyncNotifier` do Riverpod.
+- `views/`: Telas e widgets reutilizáveis.
+- `constants/`: Cores, estilos e strings estáticas.
+
+## 3. Regras Técnicas Obrigatórias
+
+### Gerenciamento de Estado (Riverpod 2.x)
+- Use preferencialmente `Notifier` (síncrono) ou `AsyncNotifier` (assíncrono).
+- Evite o uso de `StateProvider` ou `ChangeNotifier`.
+- Sempre utilize o modificador `.family` para providers que precisam de parâmetros.
+- Utilize `ref.watch` dentro do build e `ref.read` dentro de callbacks/funções.
+
+### Interface (UI)
+- Use **`ConsumerWidget`** em vez de `StatelessWidget` nas páginas.
+- Use **`ConsumerStatefulWidget`** se houver necessidade de `initState` ou `TickerProvider`.
+- Mantenha os métodos `onPressed` limpos: `onPressed: () => ref.read(meuProvider.notifier).acao()`.
+
+### Componentes reutilizáveis
+- **Não use métodos que retornem widgets** (ex.: `_buildCard()`). Extraia trechos de UI em arquivos próprios.
+- Componentes devem ficar em arquivos cujo nome **termine com `_component.dart`** (ex.: `member_card_component.dart`).
+- Cada componente deve ser um **`StatelessWidget`** (ou **`ConsumerWidget`** apenas se precisar de `ref`).
+- Prefira receber dados e callbacks por parâmetros para permitir reuso em mais de uma página.
+- **Localização:** Coloque o componente na pasta da sua feature (ex.: `auth_logo_component.dart` em `views/auth/`). Se o componente for **compartilhado entre mais de uma feature** (ex.: usado em auth e em dashboard), mantenha-o em `views/components/`.
+
+### Dados e Repositórios
+- Repositórios devem ser classes simples injetadas via um `Provider` básico (Ex: `final repoProvider = Provider((ref) => MyRepository());`).
+- **Não chame repositórios diretamente nas páginas/views.** Use sempre os providers de domínio: `auth_provider` para operações de autenticação (enviar código, criar auth, login) e `user_provider` para operações de usuário (obter/criar usuário atual). Use `session_provider` para fluxo de sessão (login, primeiro acesso, logout).
+- Trate erros de API/Banco de dados dentro do Repositório ou no AsyncNotifier, nunca no Widget.
+
+### Views de Auth vs User
+- Mantenha views de **autenticação** (login, criar conta, código, esqueci senha) em `views/auth/`.
+- Mantenha views de **usuário** (ex.: primeiro acesso — nome e telefone) em `views/user/`. Não misture telas de usuário dentro de `views/auth/`.
+
+## 4. Padrões de Código (Style Guide)
+- Use **`const`** construtores sempre que possível para performance.
+- Nomeação de arquivos: `snake_case.dart`.
+- Nomeação de classes: `PascalCase`.
+- Erros e Estados Vazios: Sempre trate estados de `.loading` e `.error` ao consumir `AsyncValue`.
+
+## 5. Exemplo de Implementação de Referência (Async)
+Ao criar um novo recurso, siga este padrão:
+
+```dart
+// 1. Model
+class Item { ... }
+
+// 2. Repository
+class ItemRepository {
+  Future<List<Item>> fetchItems() async { ... }
+}
+final itemRepositoryProvider = Provider((ref) => ItemRepository());
+
+// 3. Provider
+class ItemListNotifier extends AsyncNotifier<List<Item>> {
+  @override
+  Future<List<Item>> build() => ref.read(itemRepositoryProvider).fetchItems();
+}
+final itemListProvider = AsyncNotifierProvider<ItemListNotifier, List<Item>>(ItemListNotifier.new);

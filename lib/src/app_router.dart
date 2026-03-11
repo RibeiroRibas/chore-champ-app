@@ -20,23 +20,18 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 bool _isShellPath(String loc) =>
-    loc == '/' || loc == '/chores' || loc == '/achievements' || loc == '/rewards' || loc == '/family';
+    loc == '/' ||
+    loc == '/chores' ||
+    loc == '/achievements' ||
+    loc == '/rewards' ||
+    loc == '/family';
 
-GoRouter createAppRouter() {
+GoRouter _createGoRouter() {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/login',
     redirect: (context, state) {
-      final container = ProviderScope.containerOf(context);
-      final session = container.read(sessionProvider);
-      final loc = state.matchedLocation;
-      if (session.accessToken != null && session.needFirstAccess && loc != '/create-user-first-access') {
-        return '/create-user-first-access';
-      }
-      if (session.accessToken == null && _isShellPath(loc)) {
-        return '/login';
-      }
-      return null;
+      return _handleRedirect(context, state);
     },
     routes: [
       GoRoute(
@@ -78,23 +73,28 @@ GoRouter createAppRouter() {
         routes: [
           GoRoute(
             path: '/',
-            pageBuilder: (_, state) => const NoTransitionPage(child: HomePage()),
+            pageBuilder: (_, state) =>
+                const NoTransitionPage(child: HomePage()),
           ),
           GoRoute(
             path: '/chores',
-            pageBuilder: (_, state) => const NoTransitionPage(child: ChoresPage()),
+            pageBuilder: (_, state) =>
+                const NoTransitionPage(child: ChoresPage()),
           ),
           GoRoute(
             path: '/achievements',
-            pageBuilder: (_, state) => const NoTransitionPage(child: AchievementsPage()),
+            pageBuilder: (_, state) =>
+                const NoTransitionPage(child: AchievementsPage()),
           ),
           GoRoute(
             path: '/rewards',
-            pageBuilder: (_, state) => NoTransitionPage(child: const RewardsPage()),
+            pageBuilder: (_, state) =>
+                NoTransitionPage(child: const RewardsPage()),
           ),
           GoRoute(
             path: '/family',
-            pageBuilder: (_, state) => const NoTransitionPage(child: FamilyPage()),
+            pageBuilder: (_, state) =>
+                const NoTransitionPage(child: FamilyPage()),
           ),
         ],
       ),
@@ -102,3 +102,47 @@ GoRouter createAppRouter() {
     errorBuilder: (_, __) => const NotFoundPage(),
   );
 }
+
+String? _handleRedirect(BuildContext context, GoRouterState state) {
+  final container = ProviderScope.containerOf(context);
+  final sessionAsync = container.read(sessionProvider);
+  final currentRoute = state.matchedLocation;
+  if (sessionAsync.isLoading) return null;
+  final session = sessionAsync.valueOrNull;
+  if (session == null) {
+    if (_isShellPath(currentRoute)) return '/login';
+    return null;
+  }
+  if (_isAuthenticatedAndNeedDoFirstAccess(session, currentRoute)) {
+    return '/create-user-first-access';
+  }
+  if (_isAuthenticatedAndCanGoHomePage(session, currentRoute)) {
+    return '/';
+  }
+  if (_needAuthenticate(session, currentRoute)) {
+    return '/login';
+  }
+  return null;
+}
+
+bool _isAuthenticatedAndNeedDoFirstAccess(SessionState session, String currentRoute) {
+  return session.accessToken != null &&
+    session.needFirstAccess &&
+    currentRoute != '/create-user-first-access';
+}
+
+bool _isAuthenticatedAndCanGoHomePage(SessionState session, String currentRoute) {
+  return session.accessToken != null &&
+    !session.needFirstAccess &&
+    (currentRoute == '/login' ||
+        currentRoute == '/create-user-first-access');
+}
+
+bool _needAuthenticate(SessionState session, String currentRoute) =>
+    session.accessToken == null && _isShellPath(currentRoute);
+
+final appRouterProvider = Provider<GoRouter>((ref) {
+  final router = _createGoRouter();
+  ref.onDispose(router.dispose);
+  return router;
+});

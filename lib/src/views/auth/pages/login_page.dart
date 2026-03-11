@@ -39,8 +39,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             _passwordController.text,
           );
       if (!mounted) return;
-      final state = ref.read(sessionProvider);
-      if (state.needFirstAccess) {
+      final state = ref.read(sessionProvider).valueOrNull;
+      if (state?.needFirstAccess == true) {
         context.go('/create-user-first-access');
       } else {
         context.go('/');

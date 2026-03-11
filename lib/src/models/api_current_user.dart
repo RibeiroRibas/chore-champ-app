@@ -34,4 +34,13 @@ class ApiCurrentUser {
           : ApiCurrentUserFamily(id: 0, name: ''),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'auth_id': authId,
+        'role': {'id': roleId, 'name': roleName},
+        'phone_number': phoneNumber,
+        'family': family.toJson(),
+      };
 }

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/family_member.dart';
 import 'members_provider.dart';
-import 'repositories_provider.dart';
+import 'session_provider.dart';
 
 class CurrentUserIdNotifier extends Notifier<String> {
   @override
@@ -11,16 +11,9 @@ class CurrentUserIdNotifier extends Notifier<String> {
     state = id;
   }
 
-  Future<void> loadFromAuth() async {
-    final auth = ref.read(authRepositoryProvider);
-    // final id = await auth.getCurrentUserId();
-    // if (id != null) state = id;
-  }
-
   Future<void> persist(String id) async {
-    final auth = ref.read(authRepositoryProvider);
-    // await auth.setCurrentUserId(id);
     state = id;
+    await ref.read(sessionStorageProvider).setCurrentUserId(id);
   }
 }
 

@@ -77,9 +77,9 @@ class AppHeader extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.logout_rounded, color: AppColors.mutedForeground, size: 22),
               tooltip: AppStrings.signOut,
-              onPressed: () {
-                ref.read(sessionProvider.notifier).logout();
-                context.go('/login');
+              onPressed: () async {
+                await ref.read(sessionProvider.notifier).logout();
+                if (context.mounted) context.go('/login');
               },
             ),
           ],

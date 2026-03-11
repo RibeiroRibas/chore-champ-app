@@ -24,7 +24,7 @@ class UserRepository {
     required String familyName,
   }) async {
     try {
-      await _client.post('/users/current', body: {
+      await _client.post('/users/current-and-family', body: {
         'name': name,
         'phone': phone,
         'family_name': familyName,

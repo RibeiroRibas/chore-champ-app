@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,12 +21,39 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
   final _codeControllers = List.generate(4, (_) => TextEditingController());
   final _codeFocusNodes = List.generate(4, (_) => FocusNode());
   bool _loading = false;
+  int _resendSecondsRemaining = 120;
+  Timer? _resendTimer;
+  bool _resendLoading = false;
 
   String get _email => (GoRouterState.of(context).extra as Map<String, dynamic>?)?['email'] as String? ?? '';
   String get _password => (GoRouterState.of(context).extra as Map<String, dynamic>?)?['password'] as String? ?? '';
 
   @override
+  void initState() {
+    super.initState();
+    _startResendTimer();
+  }
+
+  void _startResendTimer() {
+    _resendTimer?.cancel();
+    if (_resendSecondsRemaining <= 0) return;
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() {
+        if (_resendSecondsRemaining > 0) {
+          _resendSecondsRemaining--;
+        }
+        if (_resendSecondsRemaining <= 0) {
+          _resendTimer?.cancel();
+          _resendTimer = null;
+        }
+      });
+    });
+  }
+
+  @override
   void dispose() {
+    _resendTimer?.cancel();
     for (final c in _codeControllers) {
       c.dispose();
     }
@@ -38,6 +67,41 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
     final s = _codeControllers.map((c) => c.text.trim()).join();
     if (s.length != 4) return null;
     return int.tryParse(s);
+  }
+
+  Future<void> _handleResendCode() async {
+    if (_email.isEmpty) return;
+    setState(() => _resendLoading = true);
+    try {
+      await ref.read(authProvider.notifier).sendEmailCreateAuthCode(_email);
+      if (!mounted) return;
+      setState(() {
+        _resendLoading = false;
+        _resendSecondsRemaining = 120;
+      });
+      _startResendTimer();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Código reenviado para o seu e-mail.')),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _resendLoading = false);
+      showApiErrorSnackBar(context, e);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _resendLoading = false);
+      showGenericErrorSnackBar(context);
+    }
+  }
+
+  String get _resendButtonLabel {
+    if (_resendSecondsRemaining > 0) {
+      final m = _resendSecondsRemaining ~/ 60;
+      final s = _resendSecondsRemaining % 60;
+      return 'Reenviar código por e-mail ($m:${s.toString().padLeft(2, '0')})';
+    }
+    return 'Reenviar código por e-mail';
   }
 
   Future<void> _handleConfirm() async {
@@ -146,6 +210,19 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
                             )
                           : const Text(AppStrings.confirmCode),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: (_resendSecondsRemaining > 0 || _resendLoading || _email.isEmpty)
+                        ? null
+                        : _handleResendCode,
+                    child: _resendLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(_resendButtonLabel),
                   ),
                 ],
               ),

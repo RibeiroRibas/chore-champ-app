@@ -1,11 +1,10 @@
+import 'package:chore_champ_app/src/infra/api_exception.dart';
 import 'package:chore_champ_app/src/models/role.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../constants/app_strings.dart';
 import '../../../infra/api_error_presentation.dart';
-import '../../../infra/api_exception.dart';
-import '../../../models/achievement.dart';
-import '../../../models/chore.dart';
 import '../../../models/family_member.dart';
 import '../../../providers/achievements_provider.dart';
 import '../../../providers/chores_provider.dart';
@@ -14,7 +13,7 @@ import '../../../providers/members_provider.dart';
 import '../components/admin_required_message_component.dart';
 import '../components/delete_member_dialog_component.dart';
 import '../components/member_card_component.dart';
-import '../components/member_form_dialog_component.dart';
+import '../components/member_form_dialog_component.dart' show MemberFormDialogComponent, formatPhoneDisplay;
 
 class FamilyPage extends ConsumerStatefulWidget {
   const FamilyPage({super.key});
@@ -24,6 +23,7 @@ class FamilyPage extends ConsumerStatefulWidget {
 }
 
 class _FamilyPageState extends ConsumerState<FamilyPage> {
+  final _memberFormKey = GlobalKey<FormState>();
   bool _dialogOpen = false;
   FamilyMember? _editingMember;
   String? _deleteId;
@@ -51,7 +51,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
       _editingMember = member;
       _name = member.name;
       _email = member.email ?? '';
-      _phone = member.phoneNumber ?? '';
+      _phone = formatPhoneDisplay(member.phoneNumber ?? '');
       _avatar = member.avatar;
       _role = member.role;
       _dialogOpen = true;
@@ -60,13 +60,15 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
 
   Future<void> _handleSave() async {
     if (_name.trim().isEmpty || _email.trim().isEmpty || _phone.trim().isEmpty) return;
+    final phoneDigits = _phone.replaceAll(RegExp(r'\D'), '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) return;
     try {
       if (_editingMember != null) {
         await ref.read(membersProvider.notifier).updateMember(
               _editingMember!.id,
               name: _name.trim(),
               email: _email.trim(),
-              phone: _phone.trim(),
+              phone: phoneDigits,
               roleId: FamilyMember.roleIdFromRole(_role),
               avatar: _avatar,
             );
@@ -74,7 +76,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
         await ref.read(membersProvider.notifier).addMember(
               name: _name.trim(),
               email: _email.trim(),
-              phone: _phone.trim(),
+              phone: phoneDigits,
               roleId: FamilyMember.roleIdFromRole(_role),
               avatar: _avatar,
             );
@@ -207,6 +209,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
                     ),
                     if (_dialogOpen)
                       MemberFormDialogComponent(
+                        formKey: _memberFormKey,
                         isEditing: _editingMember != null,
                         name: _name,
                         email: _email,
@@ -252,7 +255,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
     final String message;
     final int? code;
     if (error is ApiException) {
-      message = userMessageFrom(error);
+      message = messageForApiCode(error.code);
       code = error.code;
     } else {
       message = defaultApiErrorMessage;

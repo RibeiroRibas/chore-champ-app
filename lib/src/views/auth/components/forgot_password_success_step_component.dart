@@ -26,7 +26,7 @@ class ForgotPasswordSuccessStepComponent extends StatelessWidget {
         const SizedBox(height: 24),
         Text(AppStrings.codeVerified, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 4),
-        Text(AppStrings.youCanResetPassword, style: Theme.of(context).textTheme.bodySmall),
+        Text(AppStrings.passwordResetSuccess, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
         const SizedBox(height: 24),
         SizedBox(
           height: 48,

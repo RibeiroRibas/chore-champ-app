@@ -52,4 +52,29 @@ class AuthRepository {
     }
   }
 
+  Future<void> sendEmailForgetPasswordCode(String email) async {
+    try {
+      await _client.post('/auth/send-email-forget-password-code/${Uri.encodeComponent(email)}');
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required int confirmationCode,
+    required String password,
+  }) async {
+    try {
+      await _client.patch('/auth/reset-password', body: {
+        'email': email,
+        'confirmation_code': confirmationCode,
+        'password': password,
+      });
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
+  }
 }

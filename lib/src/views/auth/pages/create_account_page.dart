@@ -36,13 +36,18 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
     if (_formKey.currentState?.validate() != true) return;
     setState(() => _loading = true);
     try {
-      await ref.read(authProvider.notifier).sendEmailCreateAuthCode(_emailController.text.trim());
+      await ref
+          .read(authProvider.notifier)
+          .sendEmailCreateAuthCode(_emailController.text.trim());
       if (!mounted) return;
       setState(() => _loading = false);
-      await context.push('/create-account-code', extra: {
-        'email': _emailController.text.trim(),
-        'password': _passwordController.text,
-      });
+      await context.push(
+        '/create-account-code',
+        extra: {
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+        },
+      );
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
@@ -78,9 +83,15 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                   const SizedBox(height: 16),
                   const AuthLogoComponent(),
                   const SizedBox(height: 32),
-                  Text(AppStrings.createAccount, style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    AppStrings.createAccount,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 4),
-                  Text(AppStrings.joinFamilyTeam, style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    AppStrings.joinFamilyTeam,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   const SizedBox(height: 24),
                   Form(
                     key: _formKey,
@@ -93,9 +104,15 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                           decoration: const InputDecoration(
                             labelText: AppStrings.email,
                             hintText: AppStrings.emailExample,
-                            prefixIcon: Icon(Icons.mail_outline, color: AppColors.mutedForeground, size: 20),
+                            prefixIcon: Icon(
+                              Icons.mail_outline,
+                              color: AppColors.mutedForeground,
+                              size: 20,
+                            ),
                           ),
-                          validator: (v) => (v == null || v.isEmpty) ? 'Informe o e-mail' : null,
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'Informe o e-mail'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -104,17 +121,33 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                           decoration: InputDecoration(
                             labelText: AppStrings.password,
                             hintText: '••••••••',
-                            prefixIcon: const Icon(Icons.lock_outline, color: AppColors.mutedForeground, size: 20),
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              color: AppColors.mutedForeground,
+                              size: 20,
+                            ),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
                                 color: AppColors.mutedForeground,
                                 size: 20,
                               ),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
                             ),
                           ),
-                          validator: (v) => (v == null || v.isEmpty) ? 'Informe a senha' : null,
+                          validator: (v) {
+                            if (v == null || v.isEmpty) {
+                              return 'Informe a senha';
+                            }
+                            if (v.length < 6) {
+                              return 'A senha deve ter no mínimo 6 caracteres';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -123,11 +156,22 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                           decoration: const InputDecoration(
                             labelText: AppStrings.confirmPassword,
                             hintText: '••••••••',
-                            prefixIcon: Icon(Icons.lock_outline, color: AppColors.mutedForeground, size: 20),
+                            prefixIcon: Icon(
+                              Icons.lock_outline,
+                              color: AppColors.mutedForeground,
+                              size: 20,
+                            ),
                           ),
                           validator: (v) {
-                            if (v == null || v.isEmpty) return 'Confirme a senha';
-                            if (v != _passwordController.text) return 'As senhas não coincidem';
+                            if (v == null || v.isEmpty) {
+                              return 'Confirme a senna';
+                            }
+                            if (v.length < 6) {
+                              return 'A senha deve ter no mínimo 6 caracteres';
+                            }
+                            if (v != _passwordController.text) {
+                              return 'As senhas não coincidem';
+                            }
                             return null;
                           },
                         ),
@@ -140,7 +184,10 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                                 ? const SizedBox(
                                     height: 24,
                                     width: 24,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
                                   )
                                 : const Text(AppStrings.sendCode),
                           ),

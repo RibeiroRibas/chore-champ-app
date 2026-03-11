@@ -5,7 +5,7 @@ class AppStrings {
 
   // Auth
   static const String welcomeBack = 'Bem-vindo de volta';
-  static const String welcomeBackGreeting = 'Bem-vindo de volta,';
+  static const String welcomeBackGreeting = 'Bem-vindo,';
   static const String signInToAccount = 'Entre na sua conta';
   static const String continueWithGoogle = 'Continuar com Google';
   static const String continueWithApple = 'Continuar com Apple';
@@ -27,11 +27,15 @@ class AppStrings {
   static const String sendCodeToEmail = 'Enviaremos um código de verificação para seu e-mail';
   static const String sendCode = 'Enviar código';
   static const String enterCode = 'Digite o código';
-  static const String weSentCodeTo = 'Enviamos um código de 6 dígitos para';
+  static const String weSentCodeTo = 'Enviamos um código de 4 dígitos para';
   static const String verifyCode = 'Verificar código';
   static const String resendCode = 'Reenviar código';
   static const String codeVerified = 'Código verificado!';
   static const String youCanResetPassword = 'Agora você pode redefinir sua senha.';
+  static const String resetPasswordButton = 'Redefinir senha';
+  static const String passwordResetSuccess = 'Senha alterada com sucesso. Faça login com sua nova senha.';
+  static const String invalidEmail = 'Informe um e-mail válido.';
+  static const String invalidPhone = 'Informe um telefone válido de 11 dígitos.';
 
   static const String emailInUse = 'Este e-mail já está em uso.';
   static const String invalidCredentials = 'E-mail ou senha inválidos.';

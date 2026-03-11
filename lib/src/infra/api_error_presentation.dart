@@ -7,6 +7,7 @@ const Map<int, String> _apiErrorCodeMessages = <int, String>{
   400300: 'Envio de código por e-mail está desativado.',
   400301: 'Este e-mail já está em uso. Escolha outro.',
   400302: 'Usuário já cadastrado para este acesso.',
+  400303: 'O telefone informado não está no formato adequado',
 
   // Not Found (404xxx)
   404300: 'Código de verificação não encontrado.',
@@ -16,11 +17,14 @@ const Map<int, String> _apiErrorCodeMessages = <int, String>{
   404304: 'Família não encontrada.',
 
   // Unauthorized (401xxx)
-  401300: 'Erro na validação do código.',
-  401301: 'Código expirado.',
-  401302: 'Código bloqueado.',
+  401300: 'Esse código já foi usado. Por favor, envie um novo código.',
+  401301: 'Código expirado. Por favor, envie um novo código.',
+  401302: 'Código bloqueado. Por favor, envie um novo código.',
   401303: 'Código inválido.',
   401304: 'E-mail ou senha inválidos.',
+  401305: 'Você não tem os privilégios necessários para realizar essa operação. Contate o administrador.',
+
+  422000: 'Um ou mais campos estão em um formato inválido. Por favor, verifique'
 };
 
 const String defaultApiErrorMessage =
@@ -30,18 +34,10 @@ String messageForApiCode(int code) {
   return _apiErrorCodeMessages[code] ?? defaultApiErrorMessage;
 }
 
-String userMessageFrom(ApiException exception) {
-  final fromBody = exception.message;
-  if (fromBody != null && fromBody.trim().isNotEmpty) {
-    return fromBody.trim();
-  }
-  return messageForApiCode(exception.code);
-}
-
 void showApiErrorSnackBar(BuildContext context, ApiException exception) {
   if (!context.mounted) return;
   final theme = Theme.of(context);
-  final message = userMessageFrom(exception);
+  final message = messageForApiCode(exception.code);
   final code = exception.code;
   final onError = theme.colorScheme.onError;
 

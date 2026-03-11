@@ -13,6 +13,22 @@ class AuthNotifier extends Notifier<void> {
     await _auth.sendEmailCreateAuthCode(email);
   }
 
+  Future<void> sendEmailForgetPasswordCode(String email) async {
+    await _auth.sendEmailForgetPasswordCode(email);
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required int confirmationCode,
+    required String password,
+  }) async {
+    await _auth.resetPassword(
+      email: email,
+      confirmationCode: confirmationCode,
+      password: password,
+    );
+  }
+
   Future<void> createAuth({
     required String email,
     required String password,

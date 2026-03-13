@@ -15,6 +15,7 @@ const Map<int, String> _apiErrorCodeMessages = <int, String>{
   404302: 'Conta de acesso não encontrada.',
   404303: 'Perfil de acesso não encontrado.',
   404304: 'Família não encontrada.',
+  404305: 'Tarefa não encontrada.',
 
   // Unauthorized (401xxx)
   401300: 'Esse código já foi usado. Por favor, envie um novo código.',

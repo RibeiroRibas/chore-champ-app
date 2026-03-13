@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/chore.dart';
-import '../models/family_member.dart';
 import 'repositories_provider.dart';
 import 'members_provider.dart';
 
@@ -10,41 +9,30 @@ class ChoresNotifier extends AsyncNotifier<List<Chore>> {
       ref.read(choreRepositoryProvider).fetchChores();
 
   Future<void> toggleComplete(String choreId) async {
-    final repo = ref.read(choreRepositoryProvider);
-    final memberRepo = ref.read(memberRepositoryProvider);
-    final list = repo.chores;
+    final list = state.valueOrNull;
+    if (list == null) return;
     Chore? chore;
     try {
       chore = list.firstWhere((c) => c.id == choreId);
     } catch (_) {
       return;
     }
-    final newCompleted = !chore.completed;
-    if (chore.assignedTo != null) {
-      FamilyMember? member;
-      // try {
-      //   member = memberRepo.members.firstWhere((m) => m.id == chore!.assignedTo);
-      // } catch (_) {}
-      // if (member != null) {
-      //   final newPoints = newCompleted ? member.points + chore.points : (member.points - chore.points).clamp(0, 999999);
-      //   final idx = memberRepo.members.indexWhere((m) => m.id == member!.id);
-      //   if (idx >= 0) memberRepo.members[idx] = member.copyWith(points: newPoints);
-      // }
-    }
-    final updated = chore.copyWith(completed: newCompleted);
-    final i = list.indexWhere((c) => c.id == choreId);
-    if (i >= 0) list[i] = updated;
+    final repo = ref.read(choreRepositoryProvider);
+    final updated = await repo.updateChore(chore.copyWith(completed: !chore.completed));
+    final newList = list.map((c) => c.id == choreId ? updated : c).toList();
     ref.invalidate(membersProvider);
-    state = AsyncData(List.from(list));
+    state = AsyncData(newList);
   }
 
   Future<void> assignChore(String choreId, String memberId) async {
-    final repo = ref.read(choreRepositoryProvider);
-    final list = repo.chores;
+    final list = state.valueOrNull;
+    if (list == null) return;
     final i = list.indexWhere((c) => c.id == choreId);
     if (i < 0) return;
-    list[i] = list[i].copyWith(assignedTo: memberId);
-    state = AsyncData(List.from(list));
+    final repo = ref.read(choreRepositoryProvider);
+    final updated = await repo.updateChore(list[i].copyWith(assignedTo: memberId));
+    final newList = List<Chore>.from(list)..[i] = updated;
+    state = AsyncData(newList);
   }
 
   Future<void> addChore(Chore chore) async {
@@ -56,7 +44,7 @@ class ChoresNotifier extends AsyncNotifier<List<Chore>> {
   Future<void> deleteChore(String choreId) async {
     final repo = ref.read(choreRepositoryProvider);
     await repo.deleteChore(choreId);
-    state = AsyncData(List.from(repo.chores));
+    state = AsyncData(await repo.fetchChores());
   }
 }
 

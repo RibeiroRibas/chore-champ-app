@@ -9,14 +9,12 @@ class AddChoreFormComponent extends StatelessWidget {
     required this.emojiController,
     required this.titleController,
     required this.pointsController,
-    required this.categoryController,
     required this.onSubmit,
   });
 
   final TextEditingController emojiController;
   final TextEditingController titleController;
   final TextEditingController pointsController;
-  final TextEditingController categoryController;
   final VoidCallback onSubmit;
 
   @override
@@ -46,24 +44,13 @@ class AddChoreFormComponent extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              SizedBox(
-                width: 72,
-                child: TextField(
-                  controller: pointsController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: categoryController,
-                  decoration: const InputDecoration(hintText: AppStrings.category),
-                ),
-              ),
-            ],
+          SizedBox(
+            width: 72,
+            child: TextField(
+              controller: pointsController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(),
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(

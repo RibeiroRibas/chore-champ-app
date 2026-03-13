@@ -1,45 +1,79 @@
+import 'package:dio/dio.dart';
+
+import '../infra/api_client.dart';
 import '../models/chore.dart';
 
-/// Repositório de tarefas (mock). Substituir por chamadas HTTP quando a API existir.
 class ChoreRepository {
-  ChoreRepository() : _chores = List.from(_initialChores);
+  ChoreRepository(this._client);
 
-  static final List<Chore> _initialChores = [
-    const Chore(id: 'c1', title: 'Lavar a louça', emoji: '🍽️', points: 10, assignedTo: '3', createdBy: '1', completed: false, category: 'Cozinha'),
-    const Chore(id: 'c2', title: 'Aspirar a sala', emoji: '🧹', points: 15, assignedTo: '4', createdBy: '1', completed: false, category: 'Sala'),
-    const Chore(id: 'c3', title: 'Tirar o lixo', emoji: '🗑️', points: 5, assignedTo: null, createdBy: '2', completed: false, category: 'Geral'),
-    const Chore(id: 'c4', title: 'Lavar roupa', emoji: '👕', points: 20, assignedTo: '3', createdBy: '1', completed: true, category: 'Roupa'),
-    const Chore(id: 'c5', title: 'Passear com o cachorro', emoji: '🐕', points: 15, assignedTo: '4', createdBy: '2', completed: true, category: 'Animais'),
-    const Chore(id: 'c6', title: 'Regar as plantas', emoji: '🌱', points: 5, assignedTo: null, createdBy: '1', completed: false, category: 'Jardim'),
-    const Chore(id: 'c7', title: 'Limpar o banheiro', emoji: '🛁', points: 25, assignedTo: '3', createdBy: '1', completed: false, category: 'Banheiro'),
-    const Chore(id: 'c8', title: 'Organizar a garagem', emoji: '🔧', points: 30, assignedTo: null, createdBy: '2', completed: false, category: 'Garagem'),
-  ];
+  final ApiClient _client;
 
-  final List<Chore> _chores;
+  static const String _basePath = '/family/chores';
 
   Future<List<Chore>> fetchChores() async {
-    await Future<void>.delayed(const Duration(milliseconds: 200));
-    return List.unmodifiable(_chores);
+    try {
+      final data = await _client.get<List<dynamic>>(_basePath);
+      return (data)
+          .map((e) => Chore.fromApiJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
   }
 
   Future<Chore> addChore(Chore chore) async {
-    await Future<void>.delayed(const Duration(milliseconds: 150));
-    final id = 'c${DateTime.now().millisecondsSinceEpoch}';
-    final created = chore.copyWith(id: id);
-    _chores.add(created);
-    return created;
+    try {
+      final body = <String, dynamic>{
+        'title': chore.title,
+        'emoji': chore.emoji,
+        'points': chore.points,
+        'completed': chore.completed,
+      };
+      if (chore.assignedTo != null && chore.assignedTo!.isNotEmpty) {
+        body['assigned_to_user_id'] = int.tryParse(chore.assignedTo!);
+      }
+      final data = await _client.postWithResponse<Map<String, dynamic>>(
+        _basePath,
+        body: body,
+      );
+      return Chore.fromApiJson(data);
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
   }
 
-  Future<void> updateChore(Chore chore) async {
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-    final i = _chores.indexWhere((c) => c.id == chore.id);
-    if (i >= 0) _chores[i] = chore;
+  Future<Chore> updateChore(Chore chore) async {
+    try {
+      final body = <String, dynamic>{
+        'title': chore.title,
+        'emoji': chore.emoji,
+        'points': chore.points,
+        'completed': chore.completed,
+      };
+      if (chore.assignedTo != null && chore.assignedTo!.isNotEmpty) {
+        body['assigned_to_user_id'] = int.tryParse(chore.assignedTo!);
+      } else {
+        body['assigned_to_user_id'] = null;
+      }
+      final data = await _client.patchWithResponse<Map<String, dynamic>>(
+        '$_basePath/${chore.id}',
+        body: body,
+      );
+      return Chore.fromApiJson(data);
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
   }
 
   Future<void> deleteChore(String choreId) async {
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-    _chores.removeWhere((c) => c.id == choreId);
+    try {
+      await _client.delete('$_basePath/$choreId');
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
   }
-
-  List<Chore> get chores => _chores;
 }

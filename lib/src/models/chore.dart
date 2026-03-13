@@ -7,7 +7,6 @@ class Chore {
     required this.assignedTo,
     required this.createdBy,
     required this.completed,
-    required this.category,
   });
 
   final String id;
@@ -17,7 +16,6 @@ class Chore {
   final String? assignedTo;
   final String createdBy;
   final bool completed;
-  final String category;
 
   Chore copyWith({
     String? id,
@@ -27,7 +25,6 @@ class Chore {
     String? assignedTo,
     String? createdBy,
     bool? completed,
-    String? category,
   }) {
     return Chore(
       id: id ?? this.id,
@@ -37,7 +34,6 @@ class Chore {
       assignedTo: assignedTo ?? this.assignedTo,
       createdBy: createdBy ?? this.createdBy,
       completed: completed ?? this.completed,
-      category: category ?? this.category,
     );
   }
 
@@ -49,7 +45,6 @@ class Chore {
         'assignedTo': assignedTo,
         'createdBy': createdBy,
         'completed': completed,
-        'category': category,
       };
 
   factory Chore.fromJson(Map<String, dynamic> json) {
@@ -61,7 +56,21 @@ class Chore {
       assignedTo: json['assignedTo'] as String?,
       createdBy: json['createdBy'] as String,
       completed: json['completed'] as bool,
-      category: json['category'] as String,
+    );
+  }
+
+  /// Resposta da API (snake_case, ids numéricos).
+  factory Chore.fromApiJson(Map<String, dynamic> json) {
+    return Chore(
+      id: (json['id'] as num).toString(),
+      title: json['title'] as String,
+      emoji: json['emoji'] as String,
+      points: (json['points'] as num).toInt(),
+      assignedTo: json['assigned_to'] != null
+          ? (json['assigned_to'] as num).toString()
+          : null,
+      createdBy: (json['created_by'] as num).toString(),
+      completed: json['completed'] as bool,
     );
   }
 }

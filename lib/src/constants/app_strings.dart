@@ -64,7 +64,6 @@ class AppStrings {
   // Chores
   static const String chores = 'Tarefas';
   static const String choreName = 'Nome da tarefa...';
-  static const String category = 'Categoria';
   static const String addChore = 'Adicionar tarefa';
   static const String unassigned = 'Sem responsável';
   static const String filterAll = 'Todas';

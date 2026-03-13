@@ -15,7 +15,9 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository(
 
 final userRepositoryProvider = Provider<UserRepository>((ref) => UserRepository(ref.watch(apiClientProvider)));
 
-final choreRepositoryProvider = Provider<ChoreRepository>((ref) => ChoreRepository());
+final choreRepositoryProvider = Provider<ChoreRepository>(
+  (ref) => ChoreRepository(ref.watch(apiClientProvider)),
+);
 
 final memberRepositoryProvider = Provider<FamilyRepository>((ref) => FamilyRepository(ref.watch(apiClientProvider)));
 

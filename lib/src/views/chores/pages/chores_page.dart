@@ -27,14 +27,12 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
   final _titleController = TextEditingController();
   final _emojiController = TextEditingController(text: '🧹');
   final _pointsController = TextEditingController(text: '10');
-  final _categoryController = TextEditingController(text: 'Geral');
 
   @override
   void dispose() {
     _titleController.dispose();
     _emojiController.dispose();
     _pointsController.dispose();
-    _categoryController.dispose();
     super.dispose();
   }
 
@@ -65,12 +63,10 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
           assignedTo: currentUser.role == Role.collaborator ? currentUser.id : null,
           createdBy: currentUser.id,
           completed: false,
-          category: _categoryController.text.trim().isEmpty ? 'Geral' : _categoryController.text.trim(),
         ));
     _titleController.clear();
     _emojiController.text = '🧹';
     _pointsController.text = '10';
-    _categoryController.text = 'Geral';
     setState(() => _showAdd = false);
   }
 
@@ -135,7 +131,6 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                       emojiController: _emojiController,
                       titleController: _titleController,
                       pointsController: _pointsController,
-                      categoryController: _categoryController,
                       onSubmit: () => _handleAdd(currentUser),
                     ),
                   ],

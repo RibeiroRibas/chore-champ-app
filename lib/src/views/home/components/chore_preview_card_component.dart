@@ -23,7 +23,6 @@ class ChorePreviewCardComponent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(chore.title, style: Theme.of(context).textTheme.titleSmall),
-                Text(chore.category, style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ),

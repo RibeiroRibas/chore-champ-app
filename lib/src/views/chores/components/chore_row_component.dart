@@ -57,7 +57,7 @@ class ChoreRowComponent extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '$assignedToName · ${chore.category}',
+                      assignedToName,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],

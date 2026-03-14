@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/reward.dart';
+import 'package:chore_champ_app/src/models/reward.dart';
 import 'repositories_provider.dart';
 
 class RewardsNotifier extends AsyncNotifier<List<Reward>> {

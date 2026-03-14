@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
-import '../infra/api_client.dart';
-import '../models/api_current_user.dart';
+import 'package:chore_champ_app/src/infra/api_client.dart';
+import 'package:chore_champ_app/src/models/api_current_user.dart';
 
 class UserRepository {
   UserRepository(this._client);

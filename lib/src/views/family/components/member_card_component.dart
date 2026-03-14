@@ -1,9 +1,8 @@
-import 'package:chore_champ_app/src/models/role.dart';
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_strings.dart';
+import 'package:chore_champ_app/src/models/family_member.dart';
+import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
 import 'package:flutter/material.dart';
-import '../../../constants/app_colors.dart';
-import '../../../constants/app_strings.dart';
-import '../../../models/family_member.dart';
-import '../../widgets/card_playful.dart';
 
 class MemberCardComponent extends StatelessWidget {
   const MemberCardComponent({
@@ -12,7 +11,7 @@ class MemberCardComponent extends StatelessWidget {
     required this.tasksCount,
     required this.completedCount,
     required this.achievementsCount,
-    this.isAdmin = false,
+    required this.hasAdminPermission,
     this.onEdit,
     this.onDelete,
   });
@@ -21,9 +20,9 @@ class MemberCardComponent extends StatelessWidget {
   final int tasksCount;
   final int completedCount;
   final int achievementsCount;
-  final bool isAdmin;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final bool hasAdminPermission;
 
   @override
   Widget build(BuildContext context) {
@@ -46,14 +45,14 @@ class MemberCardComponent extends StatelessWidget {
                           Text(member.name, style: Theme.of(context).textTheme.titleSmall),
                           const SizedBox(width: 6),
                           Icon(
-                            member.role == Role.admin ? Icons.shield : Icons.person,
+                            member.isAdmin() ? Icons.shield : Icons.person,
                             size: 14,
-                            color: member.role == Role.admin ? AppColors.primary : AppColors.mutedForeground,
+                            color: member.isAdmin() ? AppColors.primary : AppColors.mutedForeground,
                           ),
                         ],
                       ),
                       Text(
-                        member.role == Role.admin
+                        member.isAdmin()
                             ? AppStrings.roleAdmin
                             : AppStrings.roleCollaborator,
                         style: Theme.of(context).textTheme.bodySmall,
@@ -61,7 +60,7 @@ class MemberCardComponent extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (isAdmin) ...[
+                if (hasAdminPermission) ...[
                   IconButton(
                     onPressed: onEdit,
                     icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.mutedForeground),

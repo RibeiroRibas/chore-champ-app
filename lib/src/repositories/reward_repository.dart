@@ -1,4 +1,4 @@
-import '../models/reward.dart';
+import 'package:chore_champ_app/src/models/reward.dart';
 
 /// Repositório de recompensas (mock). Substituir por chamadas HTTP quando a API existir.
 class RewardRepository {

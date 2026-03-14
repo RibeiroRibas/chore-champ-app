@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
-import '../infra/api_client.dart';
-import '../models/family_member.dart';
+import 'package:chore_champ_app/src/infra/api_client.dart';
+import 'package:chore_champ_app/src/models/family_member.dart';
 
 class FamilyRepository {
   FamilyRepository(this._client);
@@ -22,21 +22,27 @@ class FamilyRepository {
     }
   }
 
+  Future<FamilyMember> fetchMember(int memberId) async {
+    try {
+      final data = await _client.get<dynamic>('$_basePath/$memberId');
+      return FamilyMember.fromApiJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
+  }
+
   Future<FamilyMember> addMember({
-    required String name,
-    required String email,
-    required String phone,
-    required int roleId,
-    String? avatar,
+    required FamilyMember member
   }) async {
     try {
       final body = <String, dynamic>{
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'role_id': roleId,
+        'name': member.name,
+        'email': member.email,
+        'phone': member.phoneNumber,
+        'role_id': member.getRoleId(),
+        'avatar': member.avatar,
       };
-      if (avatar != null && avatar.isNotEmpty) body['avatar'] = avatar;
       final data = await _client.postWithResponse<Map<String, dynamic>>(
         _basePath,
         body: body,
@@ -49,23 +55,17 @@ class FamilyRepository {
   }
 
   Future<FamilyMember> updateMember(
-    String memberId, {
-    required String name,
-    required String email,
-    required String phone,
-    required int roleId,
-    String? avatar,
-  }) async {
+      FamilyMember member) async {
     try {
       final body = <String, dynamic>{
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'role_id': roleId,
+        'name': member.name,
+        'email': member.email,
+        'phone': member.phoneNumber,
+        'role_id': member.getRoleId(),
+        'avatar': member.avatar,
       };
-      if (avatar != null && avatar.isNotEmpty) body['avatar'] = avatar;
       final data = await _client.put<Map<String, dynamic>>(
-        '$_basePath/$memberId',
+        '$_basePath/${member.id}',
         body: body,
       );
       return FamilyMember.fromApiJson(data);

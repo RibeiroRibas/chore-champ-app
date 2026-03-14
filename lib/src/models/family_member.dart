@@ -1,3 +1,5 @@
+import 'package:chore_champ_app/src/constants/app_contants.dart';
+import 'package:chore_champ_app/src/helpers/phone.dart';
 import 'package:chore_champ_app/src/models/role.dart';
 
 class FamilyMember {
@@ -7,8 +9,8 @@ class FamilyMember {
     required this.avatar,
     required this.role,
     this.points = 0,
-    this.email,
-    this.phoneNumber,
+    required this.email,
+    required this.phoneNumber,
   });
 
   final String id;
@@ -16,8 +18,8 @@ class FamilyMember {
   final String avatar;
   final Role role;
   final int points;
-  final String? email;
-  final String? phoneNumber;
+  final String email;
+  final String phoneNumber;
 
   FamilyMember copyWith({
     String? id,
@@ -47,13 +49,7 @@ class FamilyMember {
     return role == Role.admin ? 1 : 2;
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'avatar': avatar,
-        'role': role.name,
-        'points': points,
-      };
+  int getRoleId() => role == Role.admin ? 1 : 2;
 
   factory FamilyMember.fromApiJson(Map<String, dynamic> json) {
     final roleId = (json['role_id'] as num?)?.toInt() ?? 2;
@@ -67,21 +63,35 @@ class FamilyMember {
       avatar: avatar,
       role: roleFromRoleId(roleId),
       points: 0,
-      email: json['email'] as String?,
-      phoneNumber: json['phone_number'] as String?,
+      email: json['email'] as String,
+      phoneNumber: json['phone_number'] as String,
     );
   }
 
-  factory FamilyMember.fromJson(Map<String, dynamic> json) {
-    if (json.containsKey('role_id') || json.containsKey('email')) {
-      return FamilyMember.fromApiJson(json);
-    }
+  factory FamilyMember.build() {
     return FamilyMember(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      avatar: json['avatar'] as String,
-      role: Role.values.byName(json['role'] as String),
-      points: (json['points'] as num).toInt(),
+      id: '',
+      name: '',
+      avatar: '👩',
+      role: Role.collaborator,
+      email: '',
+      phoneNumber: '',
     );
   }
+
+  String getFirstName() {
+    if (name.contains(' ')) {
+      return name.split(' ')[0];
+    }
+    return name;
+  }
+
+  bool isAdmin() => role == Role.admin;
+
+  bool isIdEmpty() => id.isEmpty;
+
+  bool isIdPresent() => id.isNotEmpty;
+
+  bool isPresent() => name.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && isValidCellPhone(phoneNumber) && emailRegex.hasMatch(email);
+
 }

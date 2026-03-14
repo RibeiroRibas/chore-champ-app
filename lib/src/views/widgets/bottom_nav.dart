@@ -1,18 +1,28 @@
-import 'package:chore_champ_app/src/models/role.dart';
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../constants/app_colors.dart';
-import '../../constants/app_strings.dart';
-import '../../providers/current_user_provider.dart';
 
 final _navItems = [
   (path: '/', icon: Icons.home_rounded, label: AppStrings.home),
   (path: '/chores', icon: Icons.list_alt_rounded, label: AppStrings.chores),
-  (path: '/achievements', icon: Icons.emoji_events_rounded, label: AppStrings.achieve),
-  (path: '/rewards', icon: Icons.card_giftcard_rounded, label: AppStrings.rewards),
-  (path: '/family', icon: Icons.people_rounded, label: AppStrings.familyMembers),
+  (
+    path: '/achievements',
+    icon: Icons.emoji_events_rounded,
+    label: AppStrings.achieve,
+  ),
+  (
+    path: '/rewards',
+    icon: Icons.card_giftcard_rounded,
+    label: AppStrings.rewards,
+  ),
+  (
+    path: '/family',
+    icon: Icons.people_rounded,
+    label: AppStrings.familyMembers,
+  ),
 ];
 
 class BottomNav extends ConsumerWidget {
@@ -20,9 +30,6 @@ class BottomNav extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(currentUserProvider);
-    final isAdmin = currentUser?.role == Role.admin;
-    final items = isAdmin ? _navItems : _navItems.where((e) => e.path != '/family').toList();
     final location = GoRouterState.of(context).uri.path;
 
     return Container(
@@ -36,13 +43,16 @@ class BottomNav extends ConsumerWidget {
           height: 64,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: items.map((item) {
+            children: _navItems.map((item) {
               final active = location == item.path;
               return InkWell(
                 onTap: () => context.go(item.path),
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -50,7 +60,9 @@ class BottomNav extends ConsumerWidget {
                       Icon(
                         item.icon,
                         size: 22,
-                        color: active ? AppColors.primary : AppColors.mutedForeground,
+                        color: active
+                            ? AppColors.primary
+                            : AppColors.mutedForeground,
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -58,7 +70,9 @@ class BottomNav extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: active ? AppColors.primary : AppColors.mutedForeground,
+                          color: active
+                              ? AppColors.primary
+                              : AppColors.mutedForeground,
                         ),
                       ),
                     ],

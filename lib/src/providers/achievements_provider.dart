@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/achievement.dart';
+import 'package:chore_champ_app/src/models/achievement.dart';
 import 'repositories_provider.dart';
 
 class AchievementsNotifier extends AsyncNotifier<List<Achievement>> {

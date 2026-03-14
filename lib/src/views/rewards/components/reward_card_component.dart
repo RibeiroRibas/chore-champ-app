@@ -1,10 +1,10 @@
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_strings.dart';
+import 'package:chore_champ_app/src/models/achievement.dart';
+import 'package:chore_champ_app/src/models/reward.dart';
+import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
+import 'package:chore_champ_app/src/views/widgets/gradient_warm.dart';
 import 'package:flutter/material.dart';
-import '../../../constants/app_colors.dart';
-import '../../../constants/app_strings.dart';
-import '../../../models/achievement.dart';
-import '../../../models/reward.dart';
-import '../../widgets/card_playful.dart';
-import '../../widgets/gradient_warm.dart';
 
 class RewardCardComponent extends StatelessWidget {
   const RewardCardComponent({

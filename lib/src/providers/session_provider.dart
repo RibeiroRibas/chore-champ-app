@@ -1,31 +1,18 @@
 import 'dart:convert';
 
+import 'package:chore_champ_app/src/providers/states/session_state.dart';
 import 'package:chore_champ_app/src/repositories/auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../constants/api_constants.dart';
-import '../infra/api_exception.dart';
-import '../infra/session_storage.dart';
-import '../models/api_current_user.dart';
+import 'package:chore_champ_app/src/constants/api_constants.dart';
+import 'package:chore_champ_app/src/infra/api_exception.dart';
+import 'package:chore_champ_app/src/infra/session_storage.dart';
+import 'package:chore_champ_app/src/models/api_current_user.dart';
+import 'package:chore_champ_app/src/models/refresh_token_model.dart';
 import 'auth_provider.dart';
 import 'current_user_provider.dart';
 import 'repositories_provider.dart';
 import 'user_provider.dart';
-
-class SessionState {
-  const SessionState({
-    this.accessToken,
-    this.apiCurrentUser,
-    this.needFirstAccess = false,
-  });
-
-  final String? accessToken;
-  final ApiCurrentUser? apiCurrentUser;
-  final bool needFirstAccess;
-
-  bool get isLoggedIn =>
-      accessToken != null && apiCurrentUser != null && !needFirstAccess;
-}
 
 final sessionStorageProvider = Provider<SessionStorage>((ref) {
   throw StateError('SessionStorage must be overridden in main()');
@@ -35,19 +22,58 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
   @override
   Future<SessionState> build() async {
     final storage = ref.read(sessionStorageProvider);
-    final currentSessionData = await storage.loadSession();
-    if (currentSessionData.token == null || currentSessionData.token!.isEmpty) {
+    RefreshTokenModel currentSessionData = await storage.loadSession();
+
+    if (!currentSessionData.hasToken()) {
       return const SessionState();
     }
-    ref.read(apiClientProvider).setAccessToken(currentSessionData.token);
+
+    final apiClient = ref.read(apiClientProvider);
+
+    if (currentSessionData.isTokenExpired()) {
+      final refreshToken = storage.getRefreshToken();
+      final currentUserIdStr = storage.getCurrentUserId();
+
+      if (refreshToken == null ||
+          refreshToken.isEmpty ||
+          currentUserIdStr == null ||
+          currentUserIdStr.isEmpty) {
+        await storage.clearSession();
+        return const SessionState();
+      }
+
+      final currentUserId = int.tryParse(currentUserIdStr);
+      if (currentUserId == null) {
+        await storage.clearSession();
+        return const SessionState();
+      }
+
+      try {
+        final authRepository = ref.read(authRepositoryProvider);
+        final refreshResult = await authRepository.refreshToken(
+          refreshToken: refreshToken,
+          currentUserId: currentUserId,
+        );
+        await storage.setRefreshToken(refreshResult.refreshToken);
+        apiClient.setAccessToken(refreshResult.accessToken);
+        currentSessionData = currentSessionData.copyWith(
+          accessToken: refreshResult.accessToken,
+        );
+      } on ApiException {
+        await storage.clearSession();
+        return const SessionState();
+      }
+    } else {
+      apiClient.setAccessToken(currentSessionData.accessToken);
+    }
+
     ApiCurrentUser? user;
-    if (currentSessionData.userJson != null &&
-        currentSessionData.userJson!.isNotEmpty) {
+    if (currentSessionData.hasUserJson()) {
       user = _getCurrentUserFromSession(user, currentSessionData);
     }
     _notifierCurrentUserId(storage, user);
     return SessionState(
-      accessToken: currentSessionData.token,
+      accessToken: currentSessionData.accessToken,
       apiCurrentUser: user,
       needFirstAccess: currentSessionData.needFirstAccess,
     );
@@ -66,8 +92,7 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
 
   ApiCurrentUser? _getCurrentUserFromSession(
     ApiCurrentUser? user,
-    ({bool needFirstAccess, String? token, String? userJson})
-    currentSessionData,
+    RefreshTokenModel currentSessionData,
   ) {
     try {
       user = ApiCurrentUser.fromJson(
@@ -138,6 +163,7 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
         .read(authProvider.notifier)
         .login(email, password);
     ref.read(apiClientProvider).setAccessToken(loginResult.accessToken);
+    await ref.read(sessionStorageProvider).setRefreshToken(loginResult.refreshToken);
     return loginResult;
   }
 

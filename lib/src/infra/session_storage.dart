@@ -1,9 +1,12 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:chore_champ_app/src/models/refresh_token_model.dart';
+
 const _keyAccessToken = 'session_access_token';
 const _keyUserJson = 'session_user_json';
 const _keyNeedFirstAccess = 'session_need_first_access';
 const _keyCurrentUserId = 'session_current_user_id';
+const _keyRefreshToken = 'session_refresh_token';
 
 /// Persistência da sessão (token, usuário, needFirstAccess e opcionalmente currentUserId).
 class SessionStorage {
@@ -25,11 +28,17 @@ class SessionStorage {
     await _prefs.setBool(_keyNeedFirstAccess, needFirstAccess);
   }
 
-  Future<({String? token, String? userJson, bool needFirstAccess})> loadSession() async {
+  Future<RefreshTokenModel> loadSession() async {
     final token = _prefs.getString(_keyAccessToken);
     final userJson = _prefs.getString(_keyUserJson);
     final needFirstAccess = _prefs.getBool(_keyNeedFirstAccess) ?? false;
-    return (token: token, userJson: userJson, needFirstAccess: needFirstAccess);
+    final refreshToken = _prefs.getString(_keyRefreshToken);
+    return RefreshTokenModel(
+      accessToken: token,
+      refreshToken: refreshToken,
+      userJson: userJson,
+      needFirstAccess: needFirstAccess,
+    );
   }
 
   Future<void> clearSession() async {
@@ -37,6 +46,7 @@ class SessionStorage {
     await _prefs.remove(_keyUserJson);
     await _prefs.remove(_keyNeedFirstAccess);
     await _prefs.remove(_keyCurrentUserId);
+    await _prefs.remove(_keyRefreshToken);
   }
 
   String? getCurrentUserId() => _prefs.getString(_keyCurrentUserId);
@@ -48,4 +58,15 @@ class SessionStorage {
       await _prefs.setString(_keyCurrentUserId, id);
     }
   }
+
+  String? getRefreshToken() => _prefs.getString(_keyRefreshToken);
+
+  Future<void> setRefreshToken(String? token) async {
+    if (token == null || token.isEmpty) {
+      await _prefs.remove(_keyRefreshToken);
+    } else {
+      await _prefs.setString(_keyRefreshToken, token);
+    }
+  }
 }
+

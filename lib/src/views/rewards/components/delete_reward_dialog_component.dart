@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../constants/app_colors.dart';
-import '../../../constants/app_strings.dart';
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_strings.dart';
 
 class DeleteRewardDialogComponent extends StatelessWidget {
   const DeleteRewardDialogComponent({

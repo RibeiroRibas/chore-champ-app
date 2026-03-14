@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../constants/api_constants.dart';
+import 'package:chore_champ_app/src/constants/api_constants.dart';
 import 'api_exception.dart';
 
 class ApiClient {

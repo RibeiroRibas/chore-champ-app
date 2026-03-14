@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
-import '../infra/api_client.dart';
-import '../models/chore.dart';
+import 'package:chore_champ_app/src/infra/api_client.dart';
+import 'package:chore_champ_app/src/models/chore.dart';
 
 class ChoreRepository {
   ChoreRepository(this._client);
@@ -57,7 +57,7 @@ class ChoreRepository {
       } else {
         body['assigned_to_user_id'] = null;
       }
-      final data = await _client.patchWithResponse<Map<String, dynamic>>(
+      final data = await _client.put<Map<String, dynamic>>(
         '$_basePath/${chore.id}',
         body: body,
       );
@@ -71,6 +71,42 @@ class ChoreRepository {
   Future<void> deleteChore(String choreId) async {
     try {
       await _client.delete('$_basePath/$choreId');
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
+  }
+
+  Future<Chore> assignChoreToMe(String choreId) async {
+    try {
+      final data = await _client.patchWithResponse<Map<String, dynamic>>(
+        '$_basePath/$choreId/assign-to-me',
+      );
+      return Chore.fromApiJson(data);
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
+  }
+
+  Future<Chore> removeAssignChoreToMe(String choreId) async {
+    try {
+      final data = await _client.patchWithResponse<Map<String, dynamic>>(
+        '$_basePath/$choreId/remove-assign-to-me',
+      );
+      return Chore.fromApiJson(data);
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
+  }
+
+  Future<Chore> completeChore(String choreId) async {
+    try {
+      final data = await _client.patchWithResponse<Map<String, dynamic>>(
+        '$_basePath/$choreId/complete',
+      );
+      return Chore.fromApiJson(data);
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;

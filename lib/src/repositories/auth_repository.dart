@@ -1,10 +1,15 @@
 import 'package:dio/dio.dart';
 
-import '../infra/api_client.dart';
+import 'package:chore_champ_app/src/infra/api_client.dart';
 
 class LoginResult {
-  const LoginResult({required this.accessToken});
+  const LoginResult({
+    required this.accessToken,
+    required this.refreshToken,
+  });
+
   final String accessToken;
+  final String refreshToken;
 }
 
 class AuthRepository {
@@ -44,8 +49,33 @@ class AuthRepository {
         '/auth/login',
         body: {'email': email, 'password': password},
       );
-      final token = data['access_token'] ?? '';
-      return LoginResult(accessToken: token);
+      final accessToken = data['access_token'] as String? ?? '';
+      final refreshToken = data['refresh_token'] as String? ?? '';
+      return LoginResult(accessToken: accessToken, refreshToken: refreshToken);
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
+  }
+
+  Future<LoginResult> refreshToken({
+    required String refreshToken,
+    required int currentUserId,
+  }) async {
+    try {
+      final data = await _client.postWithResponse<Map<String, dynamic>>(
+        '/auth/refresh',
+        body: {
+          'refresh_token': refreshToken,
+          'current_user_id': currentUserId,
+        },
+      );
+      final accessToken = data['access_token'] as String? ?? '';
+      final newRefreshToken = data['refresh_token'] as String? ?? '';
+      return LoginResult(
+        accessToken: accessToken,
+        refreshToken: newRefreshToken,
+      );
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;

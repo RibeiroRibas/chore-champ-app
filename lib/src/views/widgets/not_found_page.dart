@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../constants/app_colors.dart';
-import '../../constants/app_strings.dart';
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_strings.dart';
 
 class NotFoundPage extends StatelessWidget {
   const NotFoundPage({super.key});

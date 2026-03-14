@@ -51,8 +51,8 @@ class AppStrings {
   static const String firstAccessSubtitle = 'Informe seu nome e telefone para continuar.';
 
   // Roles (exibição)
-  static const String roleAdmin = 'Administrador';
-  static const String roleCollaborator = 'Colaborador';
+  static const String roleAdmin = 'Admin';
+  static const String roleCollaborator = 'Colab';
 
   // Dashboard
   static const String myTasks = 'Minhas tarefas';
@@ -64,12 +64,25 @@ class AppStrings {
   // Chores
   static const String chores = 'Tarefas';
   static const String choreName = 'Nome da tarefa...';
+  static const String choreTitleLabel = 'Nome da tarefa';
   static const String addChore = 'Adicionar tarefa';
+  static const String newChore = 'Nova tarefa';
+  static const String editChore = 'Editar tarefa';
   static const String unassigned = 'Sem responsável';
   static const String filterAll = 'Todas';
   static const String filterMine = 'Minhas';
   static const String claim = 'Pegar';
+  static const String assignToMe = 'Atribuir a mim';
+  static const String removeAssignment = 'Remover atribuição';
   static const String completed = 'Concluído';
+  static const String completeButton = 'Concluir';
+  static const String confirmRemoveAssignmentTitle = 'Remover atribuição?';
+  static const String confirmRemoveAssignmentDescription = 'A tarefa ficará sem responsável.';
+  static const String confirmCompleteChoreTitle = 'Concluir tarefa?';
+  static const String confirmCompleteChoreDescription = 'Marcar esta tarefa como concluída.';
+  static const String deleteChore = 'Excluir tarefa?';
+  static const String deleteChoreDescription = 'Esta ação não pode ser desfeita.';
+  static const String pointsLabel = 'Pontos';
 
   // Achievements
   static const String achievements = 'Conquistas';

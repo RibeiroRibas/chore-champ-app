@@ -1,7 +1,7 @@
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/models/chore.dart';
+import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
 import 'package:flutter/material.dart';
-import '../../../constants/app_colors.dart';
-import '../../../models/chore.dart';
-import '../../widgets/card_playful.dart';
 
 class ChorePreviewCardComponent extends StatelessWidget {
   const ChorePreviewCardComponent({

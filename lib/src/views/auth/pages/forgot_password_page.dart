@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../constants/app_colors.dart';
-import '../../../constants/app_strings.dart';
-import '../../../infra/api_error_presentation.dart';
-import '../../../infra/api_exception.dart';
-import '../../../providers/auth_provider.dart';
-import '../components/auth_logo_component.dart';
-import '../components/forgot_password_code_step_component.dart';
-import '../components/forgot_password_email_step_component.dart';
-import '../components/forgot_password_success_step_component.dart';
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_strings.dart';
+import 'package:chore_champ_app/src/infra/api_error_presentation.dart';
+import 'package:chore_champ_app/src/infra/api_exception.dart';
+import 'package:chore_champ_app/src/providers/auth_provider.dart';
+import 'package:chore_champ_app/src/views/auth/components/auth_logo_component.dart';
+import 'package:chore_champ_app/src/views/auth/components/forgot_password_code_step_component.dart';
+import 'package:chore_champ_app/src/views/auth/components/forgot_password_email_step_component.dart';
+import 'package:chore_champ_app/src/views/auth/components/forgot_password_success_step_component.dart';
 
 enum ForgotStep { email, code, success }
 

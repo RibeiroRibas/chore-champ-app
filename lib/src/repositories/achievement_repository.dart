@@ -1,4 +1,4 @@
-import '../models/achievement.dart';
+import 'package:chore_champ_app/src/models/achievement.dart';
 
 /// Repositório de conquistas (mock). Substituir por chamadas HTTP quando a API existir.
 class AchievementRepository {

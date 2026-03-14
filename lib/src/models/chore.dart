@@ -1,3 +1,6 @@
+import 'package:chore_champ_app/src/models/family_member.dart';
+import 'package:chore_champ_app/src/models/role.dart';
+
 class Chore {
   const Chore({
     required this.id,
@@ -37,29 +40,6 @@ class Chore {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'emoji': emoji,
-        'points': points,
-        'assignedTo': assignedTo,
-        'createdBy': createdBy,
-        'completed': completed,
-      };
-
-  factory Chore.fromJson(Map<String, dynamic> json) {
-    return Chore(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      emoji: json['emoji'] as String,
-      points: (json['points'] as num).toInt(),
-      assignedTo: json['assignedTo'] as String?,
-      createdBy: json['createdBy'] as String,
-      completed: json['completed'] as bool,
-    );
-  }
-
-  /// Resposta da API (snake_case, ids numéricos).
   factory Chore.fromApiJson(Map<String, dynamic> json) {
     return Chore(
       id: (json['id'] as num).toString(),
@@ -73,4 +53,24 @@ class Chore {
       completed: json['completed'] as bool,
     );
   }
+
+  bool canEdit( FamilyMember currentUser) =>
+      currentUser.role == Role.admin || createdBy == currentUser.id;
+
+  bool canDelete(FamilyMember currentUser) =>
+      currentUser.role == Role.admin || createdBy == currentUser.id;
+
+  bool canAssignToMe(FamilyMember currentUser) =>
+      !completed && !canRemoveAssignment(currentUser) && (currentUser.role == Role.admin || assignedTo == null);
+
+  bool canRemoveAssignment(FamilyMember currentUser) =>
+      !completed &&
+          assignedTo != null &&
+          (currentUser.role == Role.admin || assignedTo == currentUser.id);
+
+  /// Botão "Concluir": só aparece se a tarefa estiver atribuída e (admin ou current user é o responsável).
+  bool canComplete(FamilyMember currentUser) =>
+      !completed &&
+          assignedTo != null &&
+          (currentUser.role == Role.admin || assignedTo == currentUser.id);
 }

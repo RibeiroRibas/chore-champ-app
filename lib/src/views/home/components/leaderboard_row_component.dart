@@ -1,9 +1,9 @@
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_strings.dart';
+import 'package:chore_champ_app/src/models/family_member.dart';
 import 'package:chore_champ_app/src/models/role.dart';
+import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
 import 'package:flutter/material.dart';
-import '../../../constants/app_colors.dart';
-import '../../../constants/app_strings.dart';
-import '../../../models/family_member.dart';
-import '../../widgets/card_playful.dart';
 
 class LeaderboardRowComponent extends StatelessWidget {
   const LeaderboardRowComponent({

@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/chore.dart';
+import 'package:chore_champ_app/src/models/chore.dart';
 import 'repositories_provider.dart';
 import 'members_provider.dart';
 
@@ -39,6 +39,42 @@ class ChoresNotifier extends AsyncNotifier<List<Chore>> {
     final repo = ref.read(choreRepositoryProvider);
     final created = await repo.addChore(chore);
     state = AsyncData([...?state.value, created]);
+  }
+
+  Future<void> updateChore(Chore chore) async {
+    final list = state.valueOrNull;
+    if (list == null) return;
+    final repo = ref.read(choreRepositoryProvider);
+    final updated = await repo.updateChore(chore);
+    final newList = list.map((c) => c.id == chore.id ? updated : c).toList();
+    state = AsyncData(newList);
+  }
+
+  Future<void> assignChoreToMe(String choreId) async {
+    final list = state.valueOrNull;
+    if (list == null) return;
+    final repo = ref.read(choreRepositoryProvider);
+    final updated = await repo.assignChoreToMe(choreId);
+    final newList = list.map((c) => c.id == choreId ? updated : c).toList();
+    state = AsyncData(newList);
+  }
+
+  Future<void> removeAssignChoreToMe(String choreId) async {
+    final list = state.valueOrNull;
+    if (list == null) return;
+    final repo = ref.read(choreRepositoryProvider);
+    final updated = await repo.removeAssignChoreToMe(choreId);
+    final newList = list.map((c) => c.id == choreId ? updated : c).toList();
+    state = AsyncData(newList);
+  }
+
+  Future<void> completeChore(String choreId) async {
+    final list = state.valueOrNull;
+    if (list == null) return;
+    final repo = ref.read(choreRepositoryProvider);
+    final updated = await repo.completeChore(choreId);
+    final newList = list.map((c) => c.id == choreId ? updated : c).toList();
+    state = AsyncData(newList);
   }
 
   Future<void> deleteChore(String choreId) async {

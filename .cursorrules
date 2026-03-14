@@ -36,9 +36,36 @@ A IA deve organizar os arquivos seguindo este padrão:
 ### Componentes reutilizáveis
 - **Não use métodos que retornem widgets** (ex.: `_buildCard()`). Extraia trechos de UI em arquivos próprios.
 - Componentes devem ficar em arquivos cujo nome **termine com `_component.dart`** (ex.: `member_card_component.dart`).
-- Cada componente deve ser um **`StatelessWidget`** (ou **`ConsumerWidget`** apenas se precisar de `ref`).
+- Componentes não podem ser um `ConsumerWidget`.
 - Prefira receber dados e callbacks por parâmetros para permitir reuso em mais de uma página.
 - **Localização:** Coloque o componente na pasta da sua feature (ex.: `auth_logo_component.dart` em `views/auth/`). Se o componente for **compartilhado entre mais de uma feature** (ex.: usado em auth e em dashboard), mantenha-o em `views/components/`.
+
+### Formulários de criação/edição (dialog overlay)
+Sempre que o fluxo for **adicionar** ou **atualizar** um registro na API, use um formulário em formato de **dialog overlay**, seguindo o padrão abaixo (referência: `views/family/components/member_form_dialog_component.dart`).
+
+**Estrutura de layout (ordem obrigatória):**
+1. **Overlay:** `Material(color: Colors.black54)` > `Center` > `SingleChildScrollView`.
+2. **Card do formulário:** `Container` com `margin: EdgeInsets.all(24)`, `padding: EdgeInsets.all(24)`, `decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(16))`.
+3. **Form:** `Form(key: formKey)` > `Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...]).
+
+**Conteúdo do Column (ordem):**
+- **Título:** `Text` dinâmico (ex.: "Novo membro" / "Editar membro") com `Theme.of(context).textTheme.titleMedium`.
+- **Espaçamento:** `SizedBox(height: 16)` após o título.
+- **Campos:** Para cada campo, na ordem:
+  - Label: `Text(label, style: Theme.of(context).textTheme.labelMedium)`.
+  - `SizedBox(height: 8)`.
+  - `TextFormField` (ou `DropdownButtonFormField` etc.) com `decoration: InputDecoration(hintText: ...)`, `validator` e `onChanged`/`initialValue` conforme o modelo.
+  - `SizedBox(height: 16)` entre um campo e o próximo.
+- **Ações (rodapé):** `SizedBox(height: 24)` > `Row(mainAxisAlignment: MainAxisAlignment.end, children: [TextButton(onCancel), SizedBox(width: 8), FilledButton(salvar)]).`
+  - Botão de salvar deve ficar desabilitado (`onPressed: null` ou condição) quando o formulário estiver inválido (ex.: entidade não preenchida).
+  - Textos dos botões: `AppStrings.cancel` e, conforme modo, texto de criação (ex.: `AppStrings.createMember`) ou `AppStrings.saveChanges`.
+
+**Regras de construção:**
+- Use **StatefulWidget**: o estado do componente guarda a entidade (ou dados equivalentes) em edição; em `initState`, se for modo edição (ex.: `widget.member != null`), preencha o estado a partir do parâmetro.
+- **Form key:** Receba `GlobalKey<FormState>` por parâmetro; na ação de salvar, chame `formKey.currentState?.validate() == true` antes de chamar o callback de persistência.
+- **Callbacks:** `onCancel: VoidCallback` e `onSave: Function(Entidade)` (ou assinatura equivalente), chamados pela página; a página é responsável por chamar o provider/repositório e fechar o dialog.
+- **Validação:** Cada campo obrigatório deve ter `validator` no `TextFormField`; mensagens de erro podem ser fixas ou usar `AppStrings` quando fizer sentido.
+- A página que exibe o formulário deve usar **Stack** e exibir o componente como overlay quando `_dialogOpen` (ou equivalente) for `true`; o botão que abre o formulário alterna esse estado.
 
 ### Dados e Repositórios
 - Repositórios devem ser classes simples injetadas via um `Provider` básico (Ex: `final repoProvider = Provider((ref) => MyRepository());`).
@@ -54,6 +81,7 @@ A IA deve organizar os arquivos seguindo este padrão:
 - Nomeação de arquivos: `snake_case.dart`.
 - Nomeação de classes: `PascalCase`.
 - Erros e Estados Vazios: Sempre trate estados de `.loading` e `.error` ao consumir `AsyncValue`.
+- **Imports:** Use sempre o path absoluto do package. Nunca use imports relativos que começam com `../` ou `./`. Exemplo: em vez de `import '../../../constants/app_colors.dart';`, use `import 'package:chore_champ_app/src/constants/app_colors.dart';`.
 
 ## 5. Exemplo de Implementação de Referência (Async)
 Ao criar um novo recurso, siga este padrão:

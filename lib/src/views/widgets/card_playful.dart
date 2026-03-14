@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_colors.dart';
 
 class CardPlayful extends StatelessWidget {
   const CardPlayful({

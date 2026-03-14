@@ -1,25 +1,19 @@
 import 'package:chore_champ_app/src/models/role.dart';
+import 'package:chore_champ_app/src/providers/current_member_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../constants/app_colors.dart';
-import '../../constants/app_strings.dart';
-import '../../models/family_member.dart';
-import '../../providers/current_user_provider.dart';
-import '../../providers/members_provider.dart';
-import '../../providers/session_provider.dart';
+
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_strings.dart';
+import 'package:chore_champ_app/src/providers/session_provider.dart';
 
 class AppHeader extends ConsumerWidget {
   const AppHeader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(currentUserProvider);
-    final membersAsync = ref.watch(membersProvider);
-
-    if (currentUser == null) {
-      return const SizedBox.shrink();
-    }
+    final currentMember = ref.watch(currentMemberProvider);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -31,51 +25,105 @@ class AppHeader extends ConsumerWidget {
         bottom: false,
         child: Row(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(AppStrings.appName, style: Theme.of(context).textTheme.titleMedium),
-                  Text(
-                    currentUser.role == Role.admin
-                        ? AppStrings.roleAdmin
-                        : AppStrings.roleCollaborator,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              width: 24,
+              height: 24,
               decoration: BoxDecoration(
-                color: AppColors.points.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('⭐', style: TextStyle(fontSize: 14)),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${currentUser.points}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.pointsForeground,
-                    ),
-                  ),
-                ],
-              ),
+              child: const Icon(Icons.emoji_events, color: AppColors.primaryForeground, size: 16),
             ),
             const SizedBox(width: 8),
-            membersAsync.when(
-              data: (members) => _buildUserDropdown(context, ref, currentUser, members),
-              loading: () => const SizedBox(width: 80, height: 36),
-              error: (_, __) => const SizedBox.shrink(),
+            Expanded(
+              child: Text(
+                AppStrings.appName,
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: 18),
+              ),
+            ),
+            currentMember.when(
+              data: (currentMember) {
+                return Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.points.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('⭐', style: TextStyle(fontSize: 14)),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${currentMember.points}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.pointsForeground,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.muted,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            currentMember.avatar,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                currentMember.getFirstName(),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                currentMember.role == Role.admin
+                                    ? AppStrings.roleAdmin
+                                    : AppStrings.roleCollaborator,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+              error: (_, _) => const SizedBox.shrink(),
+              loading: () => const Center(child: CircularProgressIndicator()),
             ),
             IconButton(
-              icon: const Icon(Icons.logout_rounded, color: AppColors.mutedForeground, size: 22),
+              icon: const Icon(
+                Icons.logout_rounded,
+                color: AppColors.mutedForeground,
+                size: 22,
+              ),
               tooltip: AppStrings.signOut,
               onPressed: () async {
                 await ref.read(sessionProvider.notifier).logout();
@@ -83,32 +131,6 @@ class AppHeader extends ConsumerWidget {
               },
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUserDropdown(BuildContext context, WidgetRef ref, FamilyMember currentUser, List<FamilyMember> members) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.muted,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: currentUser.id,
-          isDense: true,
-          icon: const Icon(Icons.arrow_drop_down, color: AppColors.foreground),
-          items: members
-              .map((m) => DropdownMenuItem(
-                    value: m.id,
-                    child: Text('${m.avatar} ${m.name}', style: const TextStyle(fontSize: 14)),
-                  ))
-              .toList(),
-          onChanged: (id) {
-            if (id != null) ref.read(currentUserIdProvider.notifier).persist(id);
-          },
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:chore_champ_app/src/providers/states/session_state.dart';
 import 'package:chore_champ_app/src/views/home/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,27 +38,27 @@ GoRouter _createGoRouter() {
       GoRoute(
         path: '/login',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const LoginPage(),
+        builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
         path: '/create-account',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const CreateAccountPage(),
+        builder: (context, state) => const CreateAccountPage(),
       ),
       GoRoute(
         path: '/create-account-code',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const CreateAccountCodePage(),
+        builder: (context, state) => const CreateAccountCodePage(),
       ),
       GoRoute(
         path: '/create-user-first-access',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const CreateUserFirstAccessPage(),
+        builder: (context, state) => const CreateUserFirstAccessPage(),
       ),
       GoRoute(
         path: '/forgot-password',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, __) => const ForgotPasswordPage(),
+        builder: (context, state) => const ForgotPasswordPage(),
       ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
@@ -99,7 +100,7 @@ GoRouter _createGoRouter() {
         ],
       ),
     ],
-    errorBuilder: (_, __) => const NotFoundPage(),
+    errorBuilder: (context, state) => const NotFoundPage(),
   );
 }
 

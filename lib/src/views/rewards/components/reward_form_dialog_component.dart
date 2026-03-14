@@ -1,7 +1,7 @@
+import 'package:chore_champ_app/src/constants/app_colors.dart';
+import 'package:chore_champ_app/src/constants/app_strings.dart';
+import 'package:chore_champ_app/src/models/achievement.dart';
 import 'package:flutter/material.dart';
-import '../../../constants/app_colors.dart';
-import '../../../constants/app_strings.dart';
-import '../../../models/achievement.dart';
 
 const _emojiOptions = ['📱', '🎬', '🍦', '🎟️', '🎮', '🛍️', '🍕', '⭐', '🎁', '🏖️', '🎵', '📚'];
 
@@ -110,7 +110,7 @@ class RewardFormDialogComponent extends StatelessWidget {
                   )
                 else
                   DropdownButtonFormField<String>(
-                    value: achievementId.isEmpty ? achievements.first.id : achievementId,
+                    initialValue: achievementId.isEmpty ? achievements.first.id : achievementId,
                     decoration: const InputDecoration(),
                     items: achievements
                         .map((a) => DropdownMenuItem<String>(

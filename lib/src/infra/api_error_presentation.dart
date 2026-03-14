@@ -8,14 +8,17 @@ const Map<int, String> _apiErrorCodeMessages = <int, String>{
   400301: 'Este e-mail já está em uso. Escolha outro.',
   400302: 'Usuário já cadastrado para este acesso.',
   400303: 'O telefone informado não está no formato adequado',
+  400304: 'Você não pode editar ou excluir uma tarefa depois de concluída',
+  400305: 'Deve haver ao menos um administrador por família',
 
   // Not Found (404xxx)
   404300: 'Código de verificação não encontrado.',
-  404301: 'Membro não encontrado.',
-  404302: 'Conta de acesso não encontrada.',
-  404303: 'Perfil de acesso não encontrado.',
-  404304: 'Família não encontrada.',
-  404305: 'Tarefa não encontrada.',
+  404301: 'Membro removido ou não encontrado.',
+  404302: 'Conta de acesso removida ou não encontrada.',
+  404303: 'Perfil de acesso removido não encontrado.',
+  404304: 'Família removida ou não encontrada.',
+  404305: 'Tarefa removida ou não encontrada.',
+  404306: 'Seu perfil de acesso foi removido ou não foi encontrado.',
 
   // Unauthorized (401xxx)
   401300: 'Esse código já foi usado. Por favor, envie um novo código.',
@@ -24,6 +27,8 @@ const Map<int, String> _apiErrorCodeMessages = <int, String>{
   401303: 'Código inválido.',
   401304: 'E-mail ou senha inválidos.',
   401305: 'Você não tem os privilégios necessários para realizar essa operação. Contate o administrador.',
+  401306: 'Você não tem permissão para atualizar a tarefa de outro membro da família',
+  401307: 'Você não tem permissão de excluir a tarefa de outro membro da família',
 
   422000: 'Um ou mais campos estão em um formato inválido. Por favor, verifique'
 };
@@ -60,7 +65,7 @@ void showApiErrorSnackBar(BuildContext context, ApiException exception) {
                     theme.textTheme.bodyMedium)
                 ?.copyWith(
               fontSize: 12,
-              color: onError.withOpacity(0.85),
+              color: onError.withValues(alpha: 0.85),
             ),
           ),
         ],
@@ -100,7 +105,7 @@ void showGenericErrorSnackBar(
                           theme.textTheme.bodyMedium)
                       ?.copyWith(
                     fontSize: 12,
-                    color: onError.withOpacity(0.85),
+                    color: onError.withValues(alpha: 0.85),
                   ),
                 ),
               ],

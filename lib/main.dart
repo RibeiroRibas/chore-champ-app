@@ -36,7 +36,7 @@ class ChoreChampApp extends ConsumerWidget {
         theme: appTheme,
         routerConfig: ref.watch(appRouterProvider),
       ),
-      error: (_, __) => MaterialApp.router(
+      error: (error, stackTrace) => MaterialApp.router(
         title: 'ChoreChamp',
         theme: appTheme,
         routerConfig: ref.watch(appRouterProvider),

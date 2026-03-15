@@ -16,6 +16,10 @@ class CreateAccountPage extends ConsumerStatefulWidget {
   ConsumerState<CreateAccountPage> createState() => _CreateAccountPageState();
 }
 
+final _emailRegex = RegExp(
+  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+);
+
 class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -24,8 +28,31 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   bool _obscurePassword = true;
   bool _loading = false;
 
+  bool get _canSubmit {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirm = _confirmController.text;
+    if (email.isEmpty || !_emailRegex.hasMatch(email)) return false;
+    if (password.isEmpty || password.length < 6) return false;
+    if (confirm.isEmpty || confirm.length < 6 || confirm != password) return false;
+    return true;
+  }
+
+  void _listenToForm() => setState(() {});
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_listenToForm);
+    _passwordController.addListener(_listenToForm);
+    _confirmController.addListener(_listenToForm);
+  }
+
   @override
   void dispose() {
+    _emailController.removeListener(_listenToForm);
+    _passwordController.removeListener(_listenToForm);
+    _confirmController.removeListener(_listenToForm);
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
@@ -110,9 +137,12 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                               size: 20,
                             ),
                           ),
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? 'Informe o e-mail'
-                              : null,
+                          validator: (v) {
+                            final value = v?.trim() ?? '';
+                            if (value.isEmpty) return 'Informe o e-mail';
+                            if (!_emailRegex.hasMatch(value)) return AppStrings.invalidEmail;
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -179,7 +209,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                         SizedBox(
                           height: 48,
                           child: ElevatedButton(
-                            onPressed: _loading ? null : _handleSendCode,
+                            onPressed: (_loading || !_canSubmit) ? null : _handleSendCode,
                             child: _loading
                                 ? const SizedBox(
                                     height: 24,

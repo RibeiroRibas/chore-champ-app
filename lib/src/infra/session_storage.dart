@@ -8,7 +8,6 @@ const _keyNeedFirstAccess = 'session_need_first_access';
 const _keyCurrentUserId = 'session_current_user_id';
 const _keyRefreshToken = 'session_refresh_token';
 
-/// Persistência da sessão (token, usuário, needFirstAccess e opcionalmente currentUserId).
 class SessionStorage {
   SessionStorage(this._prefs);
 

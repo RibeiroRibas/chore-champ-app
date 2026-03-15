@@ -28,9 +28,16 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
   String get _email => (GoRouterState.of(context).extra as Map<String, dynamic>?)?['email'] as String? ?? '';
   String get _password => (GoRouterState.of(context).extra as Map<String, dynamic>?)?['password'] as String? ?? '';
 
+  bool get _canSubmit => _getCodeAsInt() != null;
+
+  void _listenToForm() => setState(() {});
+
   @override
   void initState() {
     super.initState();
+    for (final c in _codeControllers) {
+      c.addListener(_listenToForm);
+    }
     _startResendTimer();
   }
 
@@ -55,6 +62,7 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
   void dispose() {
     _resendTimer?.cancel();
     for (final c in _codeControllers) {
+      c.removeListener(_listenToForm);
       c.dispose();
     }
     for (final f in _codeFocusNodes) {
@@ -201,7 +209,7 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
                     height: 48,
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _loading ? null : _handleConfirm,
+                      onPressed: (_loading || !_canSubmit) ? null : _handleConfirm,
                       child: _loading
                           ? const SizedBox(
                               height: 24,

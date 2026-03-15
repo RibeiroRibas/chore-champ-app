@@ -9,10 +9,15 @@ import 'package:chore_champ_app/src/infra/api_exception.dart';
 import 'package:chore_champ_app/src/infra/session_storage.dart';
 import 'package:chore_champ_app/src/models/api_current_user.dart';
 import 'package:chore_champ_app/src/models/refresh_token_model.dart';
-import 'auth_provider.dart';
-import 'current_user_provider.dart';
-import 'repositories_provider.dart';
-import 'user_provider.dart';
+import 'package:chore_champ_app/src/providers/achievements_provider.dart';
+import 'package:chore_champ_app/src/providers/chores_provider.dart';
+import 'package:chore_champ_app/src/providers/current_member_provider.dart';
+import 'package:chore_champ_app/src/providers/current_user_provider.dart';
+import 'package:chore_champ_app/src/providers/members_provider.dart';
+import 'package:chore_champ_app/src/providers/rewards_provider.dart';
+import 'package:chore_champ_app/src/providers/repositories_provider.dart';
+import 'package:chore_champ_app/src/providers/auth_provider.dart';
+import 'package:chore_champ_app/src/providers/user_provider.dart';
 
 final sessionStorageProvider = Provider<SessionStorage>((ref) {
   throw StateError('SessionStorage must be overridden in main()');
@@ -156,6 +161,7 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
     );
     await _persistSession();
     await ref.read(sessionStorageProvider).setCurrentUserId(user.id.toString());
+    _invalidateFamilyScopedProviders();
   }
 
   Future<LoginResult> _login(String email, String password) async {
@@ -184,6 +190,7 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
         .setCurrentUserId(user.id.toString());
     await _persistSession();
     await ref.read(sessionStorageProvider).setCurrentUserId(user.id.toString());
+    _invalidateFamilyScopedProviders();
   }
 
   Future<ApiCurrentUser> _completeFirstAccess(String name, String phone, String familyName) async {
@@ -203,6 +210,14 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
     ref.read(apiClientProvider).setAccessToken(null);
     ref.read(currentUserIdProvider.notifier).setCurrentUserId('');
     state = const AsyncData(SessionState());
+  }
+
+  void _invalidateFamilyScopedProviders() {
+    ref.invalidate(choresProvider);
+    ref.invalidate(membersProvider);
+    ref.invalidate(achievementsProvider);
+    ref.invalidate(rewardsProvider);
+    ref.invalidate(currentMemberProvider);
   }
 }
 

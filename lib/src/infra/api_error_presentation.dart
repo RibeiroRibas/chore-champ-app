@@ -2,6 +2,28 @@ import 'package:flutter/material.dart';
 
 import 'api_exception.dart';
 
+({Color background, Color foreground}) snackBarColorsForStatus(
+  int statusCode,
+  Color themeError,
+  Color themeOnError,
+) {
+  if (statusCode >= 500) {
+    return (background: themeError, foreground: themeOnError);
+  }
+  switch (statusCode) {
+    case 400:
+    case 422:
+      return (background: Colors.amber.shade800, foreground: Colors.white);
+    case 401:
+    case 403:
+      return (background: Colors.deepOrange.shade800, foreground: Colors.white);
+    case 404:
+      return (background: Colors.grey.shade800, foreground: Colors.white);
+    default:
+      return (background: themeError, foreground: themeOnError);
+  }
+}
+
 const Map<int, String> _apiErrorCodeMessages = <int, String>{
   // Bad Request (400xxx)
   400300: 'Envio de código por e-mail está desativado.',
@@ -45,7 +67,11 @@ void showApiErrorSnackBar(BuildContext context, ApiException exception) {
   final theme = Theme.of(context);
   final message = messageForApiCode(exception.code);
   final code = exception.code;
-  final onError = theme.colorScheme.onError;
+  final colors = snackBarColorsForStatus(
+    exception.statusCode,
+    theme.colorScheme.error,
+    theme.colorScheme.onError,
+  );
 
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
@@ -56,7 +82,7 @@ void showApiErrorSnackBar(BuildContext context, ApiException exception) {
           Text(
             message,
             style: theme.snackBarTheme.contentTextStyle ??
-                theme.textTheme.bodyMedium?.copyWith(color: onError),
+                theme.textTheme.bodyMedium?.copyWith(color: colors.foreground),
           ),
           const SizedBox(height: 6),
           Text(
@@ -65,12 +91,12 @@ void showApiErrorSnackBar(BuildContext context, ApiException exception) {
                     theme.textTheme.bodyMedium)
                 ?.copyWith(
               fontSize: 12,
-              color: onError.withValues(alpha: 0.85),
+              color: colors.foreground.withValues(alpha: 0.85),
             ),
           ),
         ],
       ),
-      backgroundColor: theme.colorScheme.error,
+      backgroundColor: colors.background,
       behavior: SnackBarBehavior.floating,
     ),
   );
@@ -84,7 +110,12 @@ void showGenericErrorSnackBar(
   if (!context.mounted) return;
   final theme = Theme.of(context);
   final displayMessage = message ?? defaultApiErrorMessage;
-  final onError = theme.colorScheme.onError;
+  final statusCode = code != null ? code ~/ 1000 : 500;
+  final colors = snackBarColorsForStatus(
+    statusCode,
+    theme.colorScheme.error,
+    theme.colorScheme.onError,
+  );
 
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
@@ -96,7 +127,7 @@ void showGenericErrorSnackBar(
                 Text(
                   displayMessage,
                   style: theme.snackBarTheme.contentTextStyle ??
-                      theme.textTheme.bodyMedium?.copyWith(color: onError),
+                      theme.textTheme.bodyMedium?.copyWith(color: colors.foreground),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -105,7 +136,7 @@ void showGenericErrorSnackBar(
                           theme.textTheme.bodyMedium)
                       ?.copyWith(
                     fontSize: 12,
-                    color: onError.withValues(alpha: 0.85),
+                    color: colors.foreground.withValues(alpha: 0.85),
                   ),
                 ),
               ],
@@ -113,9 +144,9 @@ void showGenericErrorSnackBar(
           : Text(
               displayMessage,
               style: theme.snackBarTheme.contentTextStyle ??
-                  theme.textTheme.bodyMedium?.copyWith(color: onError),
+                  theme.textTheme.bodyMedium?.copyWith(color: colors.foreground),
             ),
-      backgroundColor: theme.colorScheme.error,
+      backgroundColor: colors.background,
       behavior: SnackBarBehavior.floating,
     ),
   );

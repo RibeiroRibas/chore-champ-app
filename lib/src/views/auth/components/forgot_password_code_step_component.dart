@@ -80,8 +80,9 @@ class _ForgotPasswordCodeStepComponentState
                     maxLength: 1,
                     decoration: const InputDecoration(counterText: ''),
                     onChanged: (v) {
-                      if (v.isNotEmpty && i < 3)
+                      if (v.isNotEmpty && i < 3) {
                         widget.codeFocusNodes[i + 1].requestFocus();
+                      }
                     },
                   ),
                 ),
@@ -112,8 +113,9 @@ class _ForgotPasswordCodeStepComponentState
             ),
             validator: (v) {
               if (v == null || v.isEmpty) return 'Informe a nova senha';
-              if (v.length < 6)
+              if (v.length < 6) {
                 return 'A senha deve ter no mínimo 6 caracteres';
+              }
               return null;
             },
           ),
@@ -141,8 +143,9 @@ class _ForgotPasswordCodeStepComponentState
             ),
             validator: (v) {
               if (v == null || v.isEmpty) return 'Confirme a senha';
-              if (v != widget.passwordController.text)
+              if (v != widget.passwordController.text) {
                 return 'As senhas não coincidem';
+              }
               return null;
             },
           ),
@@ -154,8 +157,9 @@ class _ForgotPasswordCodeStepComponentState
               onPressed: widget.loading
                   ? null
                   : () {
-                      if (widget.formKey.currentState?.validate() == true)
+                      if (widget.formKey.currentState?.validate() == true) {
                         widget.onResetPassword();
+                      }
                     },
               child: widget.loading
                   ? const SizedBox(

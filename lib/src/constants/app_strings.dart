@@ -97,10 +97,16 @@ class AppStrings {
   static const String unknownMember = 'Desconhecido';
   static const String choreUpdated = 'Tarefa atualizada.';
   static const String choreCreated = 'Tarefa criada.';
+  static const String assignChoreTitle = 'Atribuir responsável';
   static const String choreAssignedToMeSuccess =
       'Você agora é o responsável pela tarefa.';
+  static const String choreAssigneeUpdated = 'Responsável atualizado.';
   static const String choreUnassignedSuccess =
       'Você não é mais o responsável pela tarefa.';
+  static const String choreAssignedToUserSuccessTemplate =
+      '%s agora é o(a) responsável pela tarefa.';
+  static const String choreUnassignedUserSuccessTemplate =
+      '%s não é mais o(a) responsável pela tarefa.';
   static const String choreCompletedSuccess = 'Tarefa concluída.';
   static const String choreDeletedSuccess = 'Tarefa excluída.';
   static const String filterToday = 'Hoje';
@@ -123,6 +129,7 @@ class AppStrings {
   static const String requiredAchievement = 'Conquista necessária';
   static const String selectAchievement = 'Selecione uma conquista';
   static const String cancel = 'Cancelar';
+  static const String confirm = 'Confirmar';
   static const String saveChanges = 'Salvar alterações';
   static const String createReward = 'Criar recompensa';
   static const String deleteReward = 'Excluir recompensa?';

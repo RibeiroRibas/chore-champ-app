@@ -12,9 +12,9 @@ class ChoreRepository {
 
   static const String _basePath = '/family/chores';
 
-  Future<List<Chore>> fetchChores() async {
+  Future<List<Chore>> fetchTodayChores() async {
     try {
-      final data = await _client.get<List<dynamic>>(_basePath);
+      final data = await _client.get<List<dynamic>>('$_basePath/today');
       return (data)
           .map((e) => Chore.fromApiJson(e as Map<String, dynamic>))
           .toList();
@@ -58,7 +58,6 @@ class ChoreRepository {
     }
   }
 
-  /// Cria uma tarefa. O endpoint retorna 204 No Content; após chamar, busque a lista novamente.
   Future<void> addChore(Chore chore) async {
     try {
       final body = <String, dynamic>{
@@ -81,7 +80,6 @@ class ChoreRepository {
     }
   }
 
-  /// Atualiza a tarefa. O endpoint não retorna o objeto; após chamar, busque a lista novamente.
   Future<void> updateChore(Chore chore) async {
     try {
       final body = <String, dynamic>{

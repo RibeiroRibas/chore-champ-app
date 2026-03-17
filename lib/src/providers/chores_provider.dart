@@ -10,7 +10,7 @@ import 'repositories_provider.dart';
 class ChoresNotifier extends AsyncNotifier<ChoresState> {
   @override
   Future<ChoresState> build() async {
-    final list = await ref.read(choreRepositoryProvider).fetchChores();
+    final list = await ref.read(choreRepositoryProvider).fetchTodayChores();
     return ChoresState(
       today: AsyncData(list),
       allPaginated: const AsyncData(null),
@@ -56,7 +56,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     final repo = ref.read(choreRepositoryProvider);
     await repo.updateChore(chore.copyWith(completed: !chore.completed));
     ref.invalidate(membersProvider);
-    final newList = await repo.fetchChores();
+    final newList = await repo.fetchTodayChores();
     state = AsyncData(
       ChoresState(
         today: AsyncData(newList),
@@ -73,7 +73,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     if (i < 0) return;
     final repo = ref.read(choreRepositoryProvider);
     await repo.updateChore(list[i].copyWith(assignedTo: memberId));
-    final newList = await repo.fetchChores();
+    final newList = await repo.fetchTodayChores();
     state = AsyncData(
       ChoresState(
         today: AsyncData(newList),
@@ -87,7 +87,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     await repo.addChore(chore);
     final filters = ref.read(allChoresFiltersProvider);
     final results = await Future.wait([
-      repo.fetchChores(),
+      repo.fetchTodayChores(),
       repo.fetchAllChores(filters),
     ]);
     state = AsyncData(
@@ -102,7 +102,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     final current = state.valueOrNull;
     final repo = ref.read(choreRepositoryProvider);
     await repo.updateChore(chore);
-    final newList = await repo.fetchChores();
+    final newList = await repo.fetchTodayChores();
     state = AsyncData(
       ChoresState(
         today: AsyncData(newList),
@@ -160,7 +160,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     final current = state.valueOrNull;
     final repo = ref.read(choreRepositoryProvider);
     await repo.deleteChore(choreId);
-    final newList = await repo.fetchChores();
+    final newList = await repo.fetchTodayChores();
     state = AsyncData(
       ChoresState(
         today: AsyncData(newList),

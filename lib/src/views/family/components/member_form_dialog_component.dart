@@ -188,8 +188,9 @@ class _MemberFormDialogComponentState extends State<MemberFormDialogComponent> {
                         )
                         .toList(),
                     onChanged: (v) {
-                      if (v != null)
+                      if (v != null) {
                         setState(() => member = member.copyWith(role: v));
+                      }
                     },
                   ),
                   if (member.isIdPresent() &&

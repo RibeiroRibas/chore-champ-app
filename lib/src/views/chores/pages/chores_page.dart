@@ -9,6 +9,7 @@ import 'package:chore_champ_app/src/filters/all_chores_filters_provider.dart';
 import 'package:chore_champ_app/src/providers/chores_provider.dart';
 import 'package:chore_champ_app/src/providers/current_member_provider.dart';
 import 'package:chore_champ_app/src/providers/members_provider.dart';
+import 'package:chore_champ_app/src/views/chores/components/assign_chore_dialog_component.dart';
 import 'package:chore_champ_app/src/views/chores/components/chore_card_component.dart';
 import 'package:chore_champ_app/src/views/chores/components/chore_form_dialog_component.dart';
 import 'package:chore_champ_app/src/views/components/rounded_dropdown_component.dart';
@@ -37,6 +38,8 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
   String? _deleteChoreId;
   Chore? _choreToRemoveAssignment;
   Chore? _choreToComplete;
+  Chore? _choreToAssign;
+  String? _assignDialogSelectedMemberId;
 
   final TextEditingController _titleController = TextEditingController();
 
@@ -94,14 +97,71 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
     }
   }
 
-  Future<void> _handleRemoveAssignment(Chore chore) async {
+  void _onAssignIconPressed(Chore chore, FamilyMember currentMember) {
+    if (currentMember.isAdmin()) {
+      setState(() {
+        _choreToAssign = chore;
+        _assignDialogSelectedMemberId = chore.assignedTo;
+      });
+    } else {
+      _handleAssignToMe(chore);
+    }
+  }
+
+  Future<void> _handleAssignChore(
+    String? memberId,
+    List<FamilyMember> members,
+  ) async {
+    if (_choreToAssign == null) return;
+    final chore = _choreToAssign!;
+    final assigneeDisplayName = memberId != null
+        ? _getMemberName(memberId, members)
+        : _getMemberName(chore.assignedTo, members);
+    setState(() => _choreToAssign = null);
+    try {
+      await ref
+          .read(choresProvider.notifier)
+          .updateChore(chore.copyWith(assignedTo: memberId));
+      if (!mounted) return;
+      final message = memberId != null
+          ? AppStrings.choreAssignedToUserSuccessTemplate.replaceFirst(
+              '%s',
+              assigneeDisplayName,
+            )
+          : AppStrings.choreUnassignedUserSuccessTemplate.replaceFirst(
+              '%s',
+              assigneeDisplayName,
+            );
+      showSuccessSnackBar(context, message: message);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      showApiErrorSnackBar(context, e);
+    } catch (_) {
+      if (!mounted) return;
+      showGenericErrorSnackBar(context);
+    }
+  }
+
+  Future<void> _handleRemoveAssignment(
+    Chore chore,
+    List<FamilyMember> members,
+    FamilyMember currentMember,
+  ) async {
     try {
       await ref.read(choresProvider.notifier).removeAssignChoreToMe(chore.id);
       if (!mounted) return;
+      final message = currentMember.isAdmin() && chore.assignedTo != null
+          ? AppStrings.choreUnassignedUserSuccessTemplate.replaceFirst(
+              '%s',
+              _getMemberName(chore.assignedTo, members),
+            )
+          : AppStrings.choreUnassignedSuccess;
       showSuccessSnackBar(
         context,
-        message: AppStrings.choreUnassignedSuccess,
-        icon: const Text('😢', style: TextStyle(fontSize: 22)),
+        message: message,
+        icon: currentMember.isAdmin()
+            ? null
+            : const Text('😢', style: TextStyle(fontSize: 22)),
       );
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -430,7 +490,10 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                     })
                                   : null,
                               onAssignToMe: chore.canAssignToMe(currentMember)
-                                  ? () => _handleAssignToMe(chore)
+                                  ? () => _onAssignIconPressed(
+                                      chore,
+                                      currentMember,
+                                    )
                                   : null,
                               onRemoveAssignment:
                                   chore.canRemoveAssignment(currentMember)
@@ -514,7 +577,11 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                         onConfirm: () async {
                           final chore = _choreToRemoveAssignment!;
                           setState(() => _choreToRemoveAssignment = null);
-                          await _handleRemoveAssignment(chore);
+                          await _handleRemoveAssignment(
+                            chore,
+                            members,
+                            currentMember,
+                          );
                         },
                       ),
                     if (_choreToComplete != null)
@@ -529,6 +596,17 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                           setState(() => _choreToComplete = null);
                           await _handleComplete(chore);
                         },
+                      ),
+                    if (_choreToAssign != null && membersAsync.hasValue)
+                      AssignChoreDialogComponent(
+                        chore: _choreToAssign!,
+                        members: membersAsync.value!,
+                        selectedMemberId: _assignDialogSelectedMemberId,
+                        onSelectedChanged: (id) =>
+                            setState(() => _assignDialogSelectedMemberId = id),
+                        onCancel: () => setState(() => _choreToAssign = null),
+                        onConfirm: (memberId) =>
+                            _handleAssignChore(memberId, membersAsync.value!),
                       ),
                   ],
                 );

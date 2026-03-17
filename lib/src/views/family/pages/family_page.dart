@@ -30,6 +30,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
 
   void _openCreate() {
     setState(() {
+      member = null;
       _dialogOpen = true;
     });
   }

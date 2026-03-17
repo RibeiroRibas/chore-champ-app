@@ -32,8 +32,9 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
     final confirm = _confirmController.text;
     if (email.isEmpty || !_emailRegex.hasMatch(email)) return false;
     if (password.isEmpty || password.length < 6) return false;
-    if (confirm.isEmpty || confirm.length < 6 || confirm != password)
+    if (confirm.isEmpty || confirm.length < 6 || confirm != password) {
       return false;
+    }
     return true;
   }
 
@@ -139,8 +140,9 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                           validator: (v) {
                             final value = v?.trim() ?? '';
                             if (value.isEmpty) return 'Informe o e-mail';
-                            if (!_emailRegex.hasMatch(value))
+                            if (!_emailRegex.hasMatch(value)) {
                               return AppStrings.invalidEmail;
+                            }
                             return null;
                           },
                         ),

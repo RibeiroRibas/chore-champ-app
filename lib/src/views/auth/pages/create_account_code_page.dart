@@ -214,8 +214,9 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
                             maxLength: 1,
                             decoration: const InputDecoration(counterText: ''),
                             onChanged: (v) {
-                              if (v.isNotEmpty && i < 3)
+                              if (v.isNotEmpty && i < 3) {
                                 _codeFocusNodes[i + 1].requestFocus();
+                              }
                             },
                           ),
                         ),

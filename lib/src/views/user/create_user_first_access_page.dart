@@ -173,8 +173,9 @@ class _CreateUserFirstAccessPageState
                             ),
                           ),
                           validator: (v) {
-                            if (!isValidCellPhone(v))
+                            if (!isValidCellPhone(v)) {
                               return 'Informe o telefone no formato (XX) XXXXX-XXXX';
+                            }
                             return null;
                           },
                         ),

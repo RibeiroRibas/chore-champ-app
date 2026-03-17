@@ -2,9 +2,7 @@ import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 
-final _emailRegex = RegExp(
-  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-);
+final _emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
 
 class ForgotPasswordEmailStepComponent extends StatelessWidget {
   const ForgotPasswordEmailStepComponent({
@@ -26,9 +24,16 @@ class ForgotPasswordEmailStepComponent extends StatelessWidget {
       key: formKey,
       child: Column(
         children: [
-          Text(AppStrings.forgotPasswordTitle, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            AppStrings.forgotPasswordTitle,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 4),
-          Text(AppStrings.sendCodeToEmail, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
+          Text(
+            AppStrings.sendCodeToEmail,
+            style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 24),
           TextFormField(
             controller: emailController,
@@ -37,7 +42,11 @@ class ForgotPasswordEmailStepComponent extends StatelessWidget {
             decoration: const InputDecoration(
               labelText: AppStrings.email,
               hintText: AppStrings.emailExample,
-              prefixIcon: Icon(Icons.mail_outline, color: AppColors.mutedForeground, size: 20),
+              prefixIcon: Icon(
+                Icons.mail_outline,
+                color: AppColors.mutedForeground,
+                size: 20,
+              ),
             ),
             validator: (v) {
               final value = v?.trim() ?? '';
@@ -56,7 +65,10 @@ class ForgotPasswordEmailStepComponent extends StatelessWidget {
                   ? const SizedBox(
                       height: 24,
                       width: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : const Text(AppStrings.sendCode),
             ),

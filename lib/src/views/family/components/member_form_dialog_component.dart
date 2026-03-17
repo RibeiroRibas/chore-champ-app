@@ -150,7 +150,8 @@ class _MemberFormDialogComponentState extends State<MemberFormDialogComponent> {
                     children: avatarOptions.map((e) {
                       final selected = member.avatar == e;
                       return GestureDetector(
-                        onTap: () => setState(() => member = member.copyWith(avatar: e)),
+                        onTap: () =>
+                            setState(() => member = member.copyWith(avatar: e)),
                         child: Container(
                           width: 44,
                           height: 44,
@@ -187,7 +188,8 @@ class _MemberFormDialogComponentState extends State<MemberFormDialogComponent> {
                         )
                         .toList(),
                     onChanged: (v) {
-                      if (v != null) setState(() => member = member.copyWith(role: v));
+                      if (v != null)
+                        setState(() => member = member.copyWith(role: v));
                     },
                   ),
                   if (member.isIdPresent() &&

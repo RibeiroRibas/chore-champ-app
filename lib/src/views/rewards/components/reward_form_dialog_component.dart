@@ -3,7 +3,20 @@ import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/achievement.dart';
 import 'package:flutter/material.dart';
 
-const _emojiOptions = ['📱', '🎬', '🍦', '🎟️', '🎮', '🛍️', '🍕', '⭐', '🎁', '🏖️', '🎵', '📚'];
+const _emojiOptions = [
+  '📱',
+  '🎬',
+  '🍦',
+  '🎟️',
+  '🎮',
+  '🛍️',
+  '🍕',
+  '⭐',
+  '🎁',
+  '🏖️',
+  '🎵',
+  '📚',
+];
 
 class RewardFormDialogComponent extends StatelessWidget {
   const RewardFormDialogComponent({
@@ -59,7 +72,10 @@ class RewardFormDialogComponent extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 16),
-                Text(AppStrings.emoji, style: Theme.of(context).textTheme.labelMedium),
+                Text(
+                  AppStrings.emoji,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -72,9 +88,13 @@ class RewardFormDialogComponent extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: selected ? AppColors.primary.withValues(alpha: 0.15) : AppColors.muted,
+                          color: selected
+                              ? AppColors.primary.withValues(alpha: 0.15)
+                              : AppColors.muted,
                           borderRadius: BorderRadius.circular(12),
-                          border: selected ? Border.all(color: AppColors.primary, width: 2) : null,
+                          border: selected
+                              ? Border.all(color: AppColors.primary, width: 2)
+                              : null,
                         ),
                         alignment: Alignment.center,
                         child: Text(e, style: const TextStyle(fontSize: 20)),
@@ -101,22 +121,34 @@ class RewardFormDialogComponent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(AppStrings.requiredAchievement, style: Theme.of(context).textTheme.labelMedium),
+                Text(
+                  AppStrings.requiredAchievement,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
                 const SizedBox(height: 8),
                 if (achievements.isEmpty)
                   const Text(
                     AppStrings.noAchievementsAvailable,
-                    style: TextStyle(color: AppColors.mutedForeground, fontSize: 14),
+                    style: TextStyle(
+                      color: AppColors.mutedForeground,
+                      fontSize: 14,
+                    ),
                   )
                 else
                   DropdownButtonFormField<String>(
-                    initialValue: achievementId.isEmpty ? achievements.first.id : achievementId,
+                    initialValue: achievementId.isEmpty
+                        ? achievements.first.id
+                        : achievementId,
                     decoration: const InputDecoration(),
                     items: achievements
-                        .map((a) => DropdownMenuItem<String>(
-                              value: a.id,
-                              child: Text('${a.emoji} ${a.title} (${a.requiredPoints} pts)'),
-                            ))
+                        .map(
+                          (a) => DropdownMenuItem<String>(
+                            value: a.id,
+                            child: Text(
+                              '${a.emoji} ${a.title} (${a.requiredPoints} pts)',
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: onAchievementIdChanged,
                   ),
@@ -131,7 +163,11 @@ class RewardFormDialogComponent extends StatelessWidget {
                     const SizedBox(width: 8),
                     FilledButton(
                       onPressed: canSave ? onSave : null,
-                      child: Text(isEditing ? AppStrings.saveChanges : AppStrings.createReward),
+                      child: Text(
+                        isEditing
+                            ? AppStrings.saveChanges
+                            : AppStrings.createReward,
+                      ),
                     ),
                   ],
                 ),

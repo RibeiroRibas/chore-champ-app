@@ -9,9 +9,15 @@ class AuthSocialButtonsComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _AuthSocialButton(label: AppStrings.continueWithGoogle, icon: Icons.g_mobiledata),
+        _AuthSocialButton(
+          label: AppStrings.continueWithGoogle,
+          icon: Icons.g_mobiledata,
+        ),
         const SizedBox(height: 12),
-        _AuthSocialButton(label: AppStrings.continueWithApple, icon: Icons.apple),
+        _AuthSocialButton(
+          label: AppStrings.continueWithApple,
+          icon: Icons.apple,
+        ),
       ],
     );
   }
@@ -33,7 +39,9 @@ class _AuthSocialButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.foreground,
           side: const BorderSide(color: AppColors.border),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

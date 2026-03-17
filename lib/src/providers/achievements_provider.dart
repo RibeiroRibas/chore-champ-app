@@ -8,4 +8,7 @@ class AchievementsNotifier extends AsyncNotifier<List<Achievement>> {
       ref.read(achievementRepositoryProvider).fetchAchievements();
 }
 
-final achievementsProvider = AsyncNotifierProvider<AchievementsNotifier, List<Achievement>>(AchievementsNotifier.new);
+final achievementsProvider =
+    AsyncNotifierProvider<AchievementsNotifier, List<Achievement>>(
+      AchievementsNotifier.new,
+    );

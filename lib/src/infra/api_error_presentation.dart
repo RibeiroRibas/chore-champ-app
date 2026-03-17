@@ -48,11 +48,15 @@ const Map<int, String> _apiErrorCodeMessages = <int, String>{
   401302: 'Código bloqueado. Por favor, envie um novo código.',
   401303: 'Código inválido.',
   401304: 'E-mail ou senha inválidos.',
-  401305: 'Você não tem os privilégios necessários para realizar essa operação. Contate o administrador.',
-  401306: 'Você não tem permissão para atualizar a tarefa de outro membro da família',
-  401307: 'Você não tem permissão de excluir a tarefa de outro membro da família',
+  401305:
+      'Você não tem os privilégios necessários para realizar essa operação. Contate o administrador.',
+  401306:
+      'Você não tem permissão para atualizar a tarefa de outro membro da família',
+  401307:
+      'Você não tem permissão de excluir a tarefa de outro membro da família',
 
-  422000: 'Um ou mais campos estão em um formato inválido. Por favor, verifique'
+  422000:
+      'Um ou mais campos estão em um formato inválido. Por favor, verifique',
 };
 
 const String defaultApiErrorMessage =
@@ -81,18 +85,20 @@ void showApiErrorSnackBar(BuildContext context, ApiException exception) {
         children: [
           Text(
             message,
-            style: theme.snackBarTheme.contentTextStyle ??
+            style:
+                theme.snackBarTheme.contentTextStyle ??
                 theme.textTheme.bodyMedium?.copyWith(color: colors.foreground),
           ),
           const SizedBox(height: 6),
           Text(
             'Código: $code',
-            style: (theme.snackBarTheme.contentTextStyle ??
-                    theme.textTheme.bodyMedium)
-                ?.copyWith(
-              fontSize: 12,
-              color: colors.foreground.withValues(alpha: 0.85),
-            ),
+            style:
+                (theme.snackBarTheme.contentTextStyle ??
+                        theme.textTheme.bodyMedium)
+                    ?.copyWith(
+                      fontSize: 12,
+                      color: colors.foreground.withValues(alpha: 0.85),
+                    ),
           ),
         ],
       ),
@@ -126,25 +132,32 @@ void showGenericErrorSnackBar(
               children: [
                 Text(
                   displayMessage,
-                  style: theme.snackBarTheme.contentTextStyle ??
-                      theme.textTheme.bodyMedium?.copyWith(color: colors.foreground),
+                  style:
+                      theme.snackBarTheme.contentTextStyle ??
+                      theme.textTheme.bodyMedium?.copyWith(
+                        color: colors.foreground,
+                      ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Código: $code',
-                  style: (theme.snackBarTheme.contentTextStyle ??
-                          theme.textTheme.bodyMedium)
-                      ?.copyWith(
-                    fontSize: 12,
-                    color: colors.foreground.withValues(alpha: 0.85),
-                  ),
+                  style:
+                      (theme.snackBarTheme.contentTextStyle ??
+                              theme.textTheme.bodyMedium)
+                          ?.copyWith(
+                            fontSize: 12,
+                            color: colors.foreground.withValues(alpha: 0.85),
+                          ),
                 ),
               ],
             )
           : Text(
               displayMessage,
-              style: theme.snackBarTheme.contentTextStyle ??
-                  theme.textTheme.bodyMedium?.copyWith(color: colors.foreground),
+              style:
+                  theme.snackBarTheme.contentTextStyle ??
+                  theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.foreground,
+                  ),
             ),
       backgroundColor: colors.background,
       behavior: SnackBarBehavior.floating,

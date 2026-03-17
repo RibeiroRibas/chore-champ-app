@@ -1,7 +1,7 @@
 import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/family_member.dart';
-import 'package:chore_champ_app/src/views/widgets/gradient_warm.dart';
+import 'package:chore_champ_app/src/views/components/gradient_warm.dart';
 import 'package:flutter/material.dart';
 
 class DashboardGreetingComponent extends StatelessWidget {
@@ -27,25 +27,31 @@ class DashboardGreetingComponent extends StatelessWidget {
             Text(
               AppStrings.welcomeBackGreeting,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.primaryForeground.withValues(alpha: 0.9),
-                  ),
+                color: AppColors.primaryForeground.withValues(alpha: 0.9),
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               '${currentUser.avatar} ${currentUser.name}',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.primaryForeground),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppColors.primaryForeground,
+              ),
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.star, color: AppColors.primaryForeground, size: 16),
+                const Icon(
+                  Icons.star,
+                  color: AppColors.primaryForeground,
+                  size: 16,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   '$completedToday/$totalChores ${AppStrings.choresCompleted}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.primaryForeground,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    color: AppColors.primaryForeground,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),

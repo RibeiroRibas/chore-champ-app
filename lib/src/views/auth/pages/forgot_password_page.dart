@@ -51,7 +51,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     if (_emailFormKey.currentState?.validate() != true) return;
     setState(() => _loadingSendCode = true);
     try {
-      await ref.read(authProvider.notifier).sendEmailForgetPasswordCode(_emailController.text.trim());
+      await ref
+          .read(authProvider.notifier)
+          .sendEmailForgetPasswordCode(_emailController.text.trim());
       if (!mounted) return;
       setState(() {
         _loadingSendCode = false;
@@ -78,12 +80,17 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     if (_codeFormKey.currentState?.validate() != true) return;
     final code = _getCodeAsInt();
     if (code == null) {
-      showGenericErrorSnackBar(context, message: 'Informe o código de 4 dígitos.');
+      showGenericErrorSnackBar(
+        context,
+        message: 'Informe o código de 4 dígitos.',
+      );
       return;
     }
     setState(() => _loadingReset = true);
     try {
-      await ref.read(authProvider.notifier).resetPassword(
+      await ref
+          .read(authProvider.notifier)
+          .resetPassword(
             email: _emailController.text.trim(),
             confirmationCode: code,
             password: _passwordController.text,
@@ -107,7 +114,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   Future<void> _handleResend() async {
     setState(() => _resendLoading = true);
     try {
-      await ref.read(authProvider.notifier).sendEmailForgetPasswordCode(_emailController.text.trim());
+      await ref
+          .read(authProvider.notifier)
+          .sendEmailForgetPasswordCode(_emailController.text.trim());
       if (!mounted) return;
       setState(() => _resendLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(

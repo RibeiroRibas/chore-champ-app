@@ -17,7 +17,9 @@ class AdminRequiredMessageComponent extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               AppStrings.adminAccessRequired,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.mutedForeground),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.mutedForeground),
             ),
           ],
         ),

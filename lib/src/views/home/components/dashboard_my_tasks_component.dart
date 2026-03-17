@@ -2,7 +2,7 @@ import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/chore.dart';
 import 'package:chore_champ_app/src/views/home/components/chore_preview_card_component.dart';
-import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
+import 'package:chore_champ_app/src/views/components/card_playful.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,7 +24,10 @@ class DashboardMyTasksComponent extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(AppStrings.myTasks, style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              AppStrings.myTasks,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             TextButton(
               onPressed: onSeeAll ?? () => context.go('/chores'),
               child: const Text(AppStrings.seeAll),
@@ -43,7 +46,10 @@ class DashboardMyTasksComponent extends StatelessWidget {
                     SizedBox(height: 8),
                     Text(
                       AppStrings.allCaughtUp,
-                      style: TextStyle(color: AppColors.mutedForeground, fontSize: 14),
+                      style: TextStyle(
+                        color: AppColors.mutedForeground,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -51,7 +57,9 @@ class DashboardMyTasksComponent extends StatelessWidget {
             ),
           )
         else
-          ...myChores.take(3).map(
+          ...myChores
+              .take(3)
+              .map(
                 (chore) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: ChorePreviewCardComponent(chore: chore),

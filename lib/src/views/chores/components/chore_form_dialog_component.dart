@@ -1,14 +1,16 @@
 import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/constants/app_contants.dart';
-import 'package:chore_champ_app/src/models/chore.dart';
-import 'package:chore_champ_app/src/models/family_member.dart';
-import 'package:chore_champ_app/src/models/role.dart';
-import 'package:flutter/material.dart';
-
-
 import 'package:chore_champ_app/src/constants/app_strings.dart';
+import 'package:chore_champ_app/src/models/chore.dart';
+import 'package:chore_champ_app/src/models/day_of_week.dart';
+import 'package:chore_champ_app/src/models/family_member.dart';
+import 'package:chore_champ_app/src/providers/members_provider.dart';
+import 'package:chore_champ_app/src/providers/repositories_provider.dart';
+import 'package:chore_champ_app/src/views/components/rounded_dropdown_component.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ChoreFormDialogComponent extends StatefulWidget {
+class ChoreFormDialogComponent extends ConsumerStatefulWidget {
   const ChoreFormDialogComponent({
     super.key,
     required this.formKey,
@@ -25,14 +27,18 @@ class ChoreFormDialogComponent extends StatefulWidget {
   final void Function(Chore chore) onSave;
 
   @override
-  State<ChoreFormDialogComponent> createState() =>
+  ConsumerState<ChoreFormDialogComponent> createState() =>
       _ChoreFormDialogComponentState();
 }
 
-class _ChoreFormDialogComponentState extends State<ChoreFormDialogComponent> {
+class _ChoreFormDialogComponentState
+    extends ConsumerState<ChoreFormDialogComponent> {
   late String _title;
   late String _emoji;
   late int _points;
+  String? _assignedToUserId;
+  late bool _isRecurring;
+  late List<int> _selectedDayIds;
 
   bool get _isEdit => widget.chore != null;
 
@@ -43,18 +49,40 @@ class _ChoreFormDialogComponentState extends State<ChoreFormDialogComponent> {
       _title = widget.chore!.title;
       _emoji = widget.chore!.emoji;
       _points = widget.chore!.points;
+      _assignedToUserId = widget.chore!.assignedTo;
+      _isRecurring = widget.chore!.isRecurring;
+      _selectedDayIds = List<int>.from(widget.chore!.recurrenceDayIds);
     } else {
       _title = '';
       _emoji = '🧹';
       _points = 10;
+      _assignedToUserId = null;
+      _isRecurring = false;
+      _selectedDayIds = [];
     }
   }
 
   bool get _isValid =>
-      _title.trim().isNotEmpty && _points >= 1 && _emoji.trim().isNotEmpty;
+      _title.trim().isNotEmpty &&
+      _points >= 1 &&
+      _emoji.trim().isNotEmpty &&
+      (!_isRecurring || _selectedDayIds.isNotEmpty);
+
+  void _toggleDay(int dayId) {
+    setState(() {
+      if (_selectedDayIds.contains(dayId)) {
+        _selectedDayIds.remove(dayId);
+      } else {
+        _selectedDayIds.add(dayId);
+        _selectedDayIds.sort();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final daysAsync = ref.watch(daysOfWeekProvider);
+
     return Material(
       color: Colors.black54,
       child: Center(
@@ -141,9 +169,7 @@ class _ChoreFormDialogComponentState extends State<ChoreFormDialogComponent> {
                       if (n != null) setState(() => _points = n!);
                     },
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      hintText: '10',
-                    ),
+                    decoration: const InputDecoration(hintText: '10'),
                     validator: (v) {
                       final n = int.tryParse(v ?? '');
                       if (n == null || n < 1) {
@@ -152,6 +178,110 @@ class _ChoreFormDialogComponentState extends State<ChoreFormDialogComponent> {
                       return null;
                     },
                   ),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppStrings.assigneeLabel,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  ref
+                      .watch(membersProvider)
+                      .when(
+                        data: (members) => SizedBox(
+                          height: 50,
+                          child: RoundedDropdownComponent<String?>(
+                            value: _assignedToUserId,
+                            labelText: null,
+                            hint: AppStrings.unassigned,
+                            items: [
+                              const DropdownMenuItem<String?>(
+                                value: null,
+                                child: Text(AppStrings.unassigned),
+                              ),
+                              ...members.map(
+                                (m) => DropdownMenuItem<String?>(
+                                  value: m.id,
+                                  child: Text(m.getFirstName()),
+                                ),
+                              ),
+                            ],
+                            onChanged: (value) =>
+                                setState(() => _assignedToUserId = value),
+                          ),
+                        ),
+                        loading: () => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        error: (_, _) => Text(
+                          AppStrings.errorGeneric,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                        ),
+                      ),
+                  const SizedBox(height: 16),
+                  CheckboxListTile(
+                    value: _isRecurring,
+                    onChanged: (v) => setState(() => _isRecurring = v ?? false),
+                    title: const Text(AppStrings.recurringChoreLabel),
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                  if (_isRecurring) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      AppStrings.selectRecurrenceDays,
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    daysAsync.when(
+                      data: (days) => Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: days.map((DayOfWeek day) {
+                          final selected = _selectedDayIds.contains(day.id);
+                          return FilterChip(
+                            label: Text(day.name),
+                            selected: selected,
+                            onSelected: (_) => _toggleDay(day.id),
+                            selectedColor: AppColors.primary,
+                            checkmarkColor: AppColors.primaryForeground,
+                          );
+                        }).toList(),
+                      ),
+                      loading: () => const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                      error: (_, _) => Text(
+                        AppStrings.errorGeneric,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                    if (_isRecurring && _selectedDayIds.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          'Selecione ao menos um dia.',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                        ),
+                      ),
+                  ],
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -193,6 +323,9 @@ class _ChoreFormDialogComponentState extends State<ChoreFormDialogComponent> {
         title: _title.trim(),
         emoji: _emoji.trim().isEmpty ? '🧹' : _emoji.trim(),
         points: _points,
+        assignedTo: _assignedToUserId,
+        isRecurring: _isRecurring,
+        recurrenceDayIds: _selectedDayIds,
       );
     }
     return Chore(
@@ -200,11 +333,11 @@ class _ChoreFormDialogComponentState extends State<ChoreFormDialogComponent> {
       title: _title.trim(),
       emoji: _emoji.trim().isEmpty ? '🧹' : _emoji.trim(),
       points: _points,
-      assignedTo: widget.currentMember.role == Role.collaborator
-          ? widget.currentMember.id
-          : null,
+      assignedTo: _assignedToUserId,
       createdBy: widget.currentMember.id,
       completed: false,
+      isRecurring: _isRecurring,
+      recurrenceDayIds: _selectedDayIds,
     );
   }
 }

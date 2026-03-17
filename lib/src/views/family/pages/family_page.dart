@@ -9,7 +9,7 @@ import 'package:chore_champ_app/src/infra/api_error_presentation.dart';
 import 'package:chore_champ_app/src/models/family_member.dart';
 import 'package:chore_champ_app/src/providers/achievements_provider.dart';
 import 'package:chore_champ_app/src/providers/chores_provider.dart';
-import 'package:chore_champ_app/src/views/widgets/confirm_delete_dialog.dart';
+import 'package:chore_champ_app/src/views/components/confirm_action_dialog.dart';
 import 'package:chore_champ_app/src/views/family/components/member_card_component.dart';
 import 'package:chore_champ_app/src/views/family/components/member_form_dialog_component.dart'
     show MemberFormDialogComponent;
@@ -108,87 +108,95 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
       data: (currentMember) => membersAsync.when(
         data: (members) {
           return choresAsync.when(
-            data: (chores) {
-              return achievementsAsync.when(
-                data: (achievements) {
-                  return Stack(
-                    children: [
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 20,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  AppStrings.familyMembers,
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                if (currentMember.isAdmin())
-                                  TextButton.icon(
-                                    onPressed: _openCreate,
-                                    icon: const Icon(Icons.add, size: 18),
-                                    label: const Text(AppStrings.add),
+            data: (choresState) => choresState.today.when(
+              data: (chores) {
+                return achievementsAsync.when(
+                  data: (achievements) {
+                    return Stack(
+                      children: [
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 20,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    AppStrings.familyMembers,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleLarge,
                                   ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            ...members.map((member) {
-                              final memberChores = chores
-                                  .where((c) => c.assignedTo == member.id)
-                                  .toList();
-                              final completedChores = memberChores
-                                  .where((c) => c.completed)
-                                  .length;
-                              final unlockedAchievements = achievements
-                                  .where(
-                                    (a) => a.unlockedBy.contains(member.id),
-                                  )
-                                  .length;
-                              return MemberCardComponent(
-                                member: member,
-                                tasksCount: memberChores.length,
-                                completedCount: completedChores,
-                                achievementsCount: unlockedAchievements,
-                                onEdit: () => _openEdit(member),
-                                onDelete: () =>
-                                    setState(() => _deleteId = member.id),
-                                hasAdminPermission: currentMember.isAdmin(),
-                              );
-                            }),
-                            const SizedBox(height: 80),
-                          ],
+                                  if (currentMember.isAdmin())
+                                    TextButton.icon(
+                                      onPressed: _openCreate,
+                                      icon: const Icon(Icons.add, size: 18),
+                                      label: const Text(AppStrings.add),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              ...members.map((member) {
+                                final memberChores = chores
+                                    .where((c) => c.assignedTo == member.id)
+                                    .toList();
+                                final completedChores = memberChores
+                                    .where((c) => c.completed)
+                                    .length;
+                                final unlockedAchievements = achievements
+                                    .where(
+                                      (a) => a.unlockedBy.contains(member.id),
+                                    )
+                                    .length;
+                                return MemberCardComponent(
+                                  member: member,
+                                  tasksCount: memberChores.length,
+                                  completedCount: completedChores,
+                                  achievementsCount: unlockedAchievements,
+                                  onEdit: () => _openEdit(member),
+                                  onDelete: () =>
+                                      setState(() => _deleteId = member.id),
+                                  hasAdminPermission: currentMember.isAdmin(),
+                                );
+                              }),
+                              const SizedBox(height: 80),
+                            ],
+                          ),
                         ),
-                      ),
-                      if (_dialogOpen)
-                        MemberFormDialogComponent(
-                          formKey: _memberFormKey,
-                          member: member,
-                          onCancel: () => setState(() => _dialogOpen = false),
-                          onSave: _handleSave,
-                          onResendPassword: member != null
-                              ? _handleResendPassword
-                              : null,
-                          resendPasswordLoading: _resendPasswordLoading,
-                        ),
-                      if (_deleteId != null)
-                        ConfirmDeleteDialog(
-                          title: AppStrings.deleteMember,
-                          description: AppStrings.deleteMemberDescription,
-                          onCancel: () => setState(() => _deleteId = null),
-                          onConfirm: _handleDelete,
-                        ),
-                    ],
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => _buildMembersErrorWidget(context, e, ref),
-              );
-            },
+                        if (_dialogOpen)
+                          MemberFormDialogComponent(
+                            formKey: _memberFormKey,
+                            member: member,
+                            onCancel: () => setState(() => _dialogOpen = false),
+                            onSave: _handleSave,
+                            onResendPassword: member != null
+                                ? _handleResendPassword
+                                : null,
+                            resendPasswordLoading: _resendPasswordLoading,
+                          ),
+                        if (_deleteId != null)
+                          ConfirmActionDialog(
+                            title: AppStrings.deleteMember,
+                            description: AppStrings.deleteMemberDescription,
+                            onCancel: () => setState(() => _deleteId = null),
+                            onConfirm: _handleDelete,
+                          ),
+                      ],
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => _buildMembersErrorWidget(context, e, ref),
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => _buildMembersErrorWidget(context, e, ref),
+            ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => _buildMembersErrorWidget(context, e, ref),
           );

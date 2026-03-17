@@ -1,7 +1,6 @@
 import 'package:chore_champ_app/src/constants/app_colors.dart';
-import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/chore.dart';
-import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
+import 'package:chore_champ_app/src/views/components/card_playful.dart';
 import 'package:flutter/material.dart';
 
 class ChoreCardComponent extends StatelessWidget {
@@ -62,30 +61,36 @@ class ChoreCardComponent extends StatelessWidget {
                         size: 22,
                       ),
                     ),
-                    Text(chore.emoji, style: const TextStyle(fontSize: 20)),
+                    SizedBox(
+                      width: 24,
+                      child: Text(
+                        chore.emoji,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    ),
                     const SizedBox(width: 12),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          chore.title,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                decoration: completed
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                              ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          assignedToName,
-                          style: Theme.of(context).textTheme.bodySmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            chore.title,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  decoration: completed
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
+                          ),
+                          Text(
+                            assignedToName,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -95,7 +100,7 @@ class ChoreCardComponent extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: completed
                             ? AppColors.mutedForeground
-                            : AppColors.success,
+                            : AppColors.primary,
                       ),
                     ),
                   ],
@@ -103,13 +108,11 @@ class ChoreCardComponent extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (showEdit && !completed) ...[
+                      if (showEdit && !completed)
                         IconButton(
                           onPressed: onEdit,
                           icon: const Icon(
@@ -119,11 +122,10 @@ class ChoreCardComponent extends StatelessWidget {
                           ),
                           style: IconButton.styleFrom(
                             padding: EdgeInsets.zero,
-                            minimumSize: const Size(32, 32),
+                            minimumSize: const Size(24, 24),
                           ),
                         ),
-                      ],
-                      if (showDelete) ...[
+                      if (showDelete)
                         IconButton(
                           onPressed: onDelete,
                           icon: const Icon(
@@ -133,68 +135,55 @@ class ChoreCardComponent extends StatelessWidget {
                           ),
                           style: IconButton.styleFrom(
                             padding: EdgeInsets.zero,
-                            minimumSize: const Size(32, 32),
+                            minimumSize: const Size(24, 24),
                           ),
                         ),
-                      ],
                     ],
                   ),
-                  if ((showAssignToMe || showRemoveAssignment) && !completed)
-                    if (showAssignToMe)
-                      TextButton(
-                        onPressed: onAssignToMe,
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 4,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showAssignToMe && !completed)
+                        IconButton(
+                          onPressed: onAssignToMe,
+                          icon: const Icon(
+                            Icons.person_add_outlined,
+                            size: 18,
+                            color: AppColors.mutedForeground,
                           ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          style: IconButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(24, 24),
+                          ),
                         ),
-                        child: Text(
-                          AppStrings.assignToMe,
-                          style: Theme.of(context).textTheme.bodyMedium!
-                              .copyWith(color: AppColors.primary),
+                      if (showRemoveAssignment && !completed)
+                        IconButton(
+                          onPressed: onRemoveAssignment,
+                          icon: const Icon(
+                            Icons.person_remove_outlined,
+                            size: 18,
+                            color: AppColors.mutedForeground,
+                          ),
+                          style: IconButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(24, 24),
+                          ),
                         ),
-                      ),
-                  if (showRemoveAssignment)
-                    TextButton(
-                      onPressed: onRemoveAssignment,
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 4,
+                      if (showComplete && !completed)
+                        IconButton(
+                          onPressed: onComplete,
+                          icon: const Icon(
+                            Icons.check_circle_outline,
+                            size: 18,
+                            color: AppColors.mutedForeground,
+                          ),
+                          style: IconButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(24, 24),
+                          ),
                         ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        AppStrings.removeAssignment,
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  if (showComplete) ...[
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: onComplete,
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 4,
-                        ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        AppStrings.completeButton,
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ],
               ),
             ],

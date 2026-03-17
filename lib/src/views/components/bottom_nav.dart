@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-
 final _navItems = [
   (path: '/', icon: Icons.home_rounded, label: AppStrings.home),
   (path: '/chores', icon: Icons.list_alt_rounded, label: AppStrings.chores),

@@ -32,4 +32,6 @@ class RewardsNotifier extends AsyncNotifier<List<Reward>> {
   }
 }
 
-final rewardsProvider = AsyncNotifierProvider<RewardsNotifier, List<Reward>>(RewardsNotifier.new);
+final rewardsProvider = AsyncNotifierProvider<RewardsNotifier, List<Reward>>(
+  RewardsNotifier.new,
+);

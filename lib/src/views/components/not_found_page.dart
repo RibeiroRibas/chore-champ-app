@@ -19,14 +19,16 @@ class NotFoundPage extends StatelessWidget {
               Text(
                 AppStrings.notFoundTitle,
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.foreground,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.foreground,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
                 AppStrings.notFoundMessage,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.mutedForeground),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.mutedForeground,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),

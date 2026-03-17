@@ -28,9 +28,15 @@ class DeleteRewardDialogComponent extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(AppStrings.deleteReward, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                AppStrings.deleteReward,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
-              Text(AppStrings.deleteRewardDescription, style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                AppStrings.deleteRewardDescription,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -42,7 +48,9 @@ class DeleteRewardDialogComponent extends StatelessWidget {
                   const SizedBox(width: 8),
                   FilledButton(
                     onPressed: onConfirm,
-                    style: FilledButton.styleFrom(backgroundColor: AppColors.destructive),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.destructive,
+                    ),
                     child: const Text(AppStrings.delete),
                   ),
                 ],

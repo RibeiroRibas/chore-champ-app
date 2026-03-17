@@ -12,6 +12,6 @@ class CurrentMemberNotifier extends AsyncNotifier<FamilyMember> {
 }
 
 final currentMemberProvider =
-AsyncNotifierProvider<CurrentMemberNotifier, FamilyMember>(
-  CurrentMemberNotifier.new,
-);
+    AsyncNotifierProvider<CurrentMemberNotifier, FamilyMember>(
+      CurrentMemberNotifier.new,
+    );

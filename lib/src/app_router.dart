@@ -5,16 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'providers/session_provider.dart';
 import 'views/achievements/pages/achievements_page.dart';
-import 'views/widgets/app_header.dart';
+import 'views/components/app_header.dart';
 import 'views/auth/pages/create_account_code_page.dart';
 import 'views/auth/pages/create_account_page.dart';
 import 'views/user/create_user_first_access_page.dart';
 import 'views/auth/pages/forgot_password_page.dart';
 import 'views/auth/pages/login_page.dart';
-import 'views/widgets/bottom_nav.dart';
+import 'views/components/bottom_nav.dart';
 import 'views/chores/pages/chores_page.dart';
 import 'views/family/pages/family_page.dart';
-import 'views/widgets/not_found_page.dart';
+import 'views/components/not_found_page.dart';
 import 'views/rewards/pages/rewards_page.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -126,17 +126,22 @@ String? _handleRedirect(BuildContext context, GoRouterState state) {
   return null;
 }
 
-bool _isAuthenticatedAndNeedDoFirstAccess(SessionState session, String currentRoute) {
+bool _isAuthenticatedAndNeedDoFirstAccess(
+  SessionState session,
+  String currentRoute,
+) {
   return session.accessToken != null &&
-    session.needFirstAccess &&
-    currentRoute != '/create-user-first-access';
+      session.needFirstAccess &&
+      currentRoute != '/create-user-first-access';
 }
 
-bool _isAuthenticatedAndCanGoHomePage(SessionState session, String currentRoute) {
+bool _isAuthenticatedAndCanGoHomePage(
+  SessionState session,
+  String currentRoute,
+) {
   return session.accessToken != null &&
-    !session.needFirstAccess &&
-    (currentRoute == '/login' ||
-        currentRoute == '/create-user-first-access');
+      !session.needFirstAccess &&
+      (currentRoute == '/login' || currentRoute == '/create-user-first-access');
 }
 
 bool _needAuthenticate(SessionState session, String currentRoute) =>

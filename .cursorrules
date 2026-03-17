@@ -17,6 +17,7 @@ A IA deve organizar os arquivos seguindo este padrão:
 - `models/`: Classes de dados puras (utilize `json_serializable` se houver muitos campos).
 - `data/`: Repositórios e serviços (Chamadas HTTP, Local Storage).
 - `providers/`: Lógica de estado usando `Notifier` ou `AsyncNotifier` do Riverpod.
+- `filters/`: Classes de filtros (ex.: `AllChoresFilters`) e o Notifier/Provider dos filtros quando aplicável. Um único Notifier por ficheiro.
 - `views/`: Telas e widgets reutilizáveis.
 - `constants/`: Cores, estilos e strings estáticas.
 
@@ -25,6 +26,7 @@ A IA deve organizar os arquivos seguindo este padrão:
 ### Gerenciamento de Estado (Riverpod 2.x)
 - Use preferencialmente `Notifier` (síncrono) ou `AsyncNotifier` (assíncrono).
 - Evite o uso de `StateProvider` ou `ChangeNotifier`.
+- **Um único Notifier por ficheiro:** Não coloque dois (ou mais) Notifiers no mesmo ficheiro; cada Notifier deve ter o seu próprio ficheiro (ex.: `chores_provider.dart` só com `ChoresNotifier`, filtros em `filters/all_chores_filters_provider.dart`).
 - Sempre utilize o modificador `.family` para providers que precisam de parâmetros.
 - Utilize `ref.watch` dentro do build e `ref.read` dentro de callbacks/funções.
 

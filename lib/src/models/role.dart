@@ -1,4 +1,1 @@
-enum Role {
-  admin,
-  collaborator,
-}
+enum Role { admin, collaborator }

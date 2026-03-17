@@ -32,9 +32,7 @@ class FamilyRepository {
     }
   }
 
-  Future<FamilyMember> addMember({
-    required FamilyMember member
-  }) async {
+  Future<FamilyMember> addMember({required FamilyMember member}) async {
     try {
       final body = <String, dynamic>{
         'name': member.name,
@@ -54,8 +52,7 @@ class FamilyRepository {
     }
   }
 
-  Future<FamilyMember> updateMember(
-      FamilyMember member) async {
+  Future<FamilyMember> updateMember(FamilyMember member) async {
     try {
       final body = <String, dynamic>{
         'name': member.name,
@@ -92,5 +89,4 @@ class FamilyRepository {
       rethrow;
     }
   }
-
 }

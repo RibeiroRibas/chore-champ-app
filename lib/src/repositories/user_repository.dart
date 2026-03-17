@@ -24,15 +24,13 @@ class UserRepository {
     required String familyName,
   }) async {
     try {
-      await _client.post('/users/current-and-family', body: {
-        'name': name,
-        'phone': phone,
-        'family_name': familyName,
-      });
+      await _client.post(
+        '/users/current-and-family',
+        body: {'name': name, 'phone': phone, 'family_name': familyName},
+      );
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;
     }
   }
-
 }

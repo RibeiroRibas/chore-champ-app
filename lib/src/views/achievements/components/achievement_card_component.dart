@@ -1,7 +1,7 @@
 import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/achievement.dart';
-import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
+import 'package:chore_champ_app/src/views/components/card_playful.dart';
 import 'package:flutter/material.dart';
 
 class AchievementCardComponent extends StatelessWidget {
@@ -40,7 +40,11 @@ class AchievementCardComponent extends StatelessWidget {
                         color: AppColors.muted,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.lock, size: 12, color: AppColors.mutedForeground),
+                      child: const Icon(
+                        Icons.lock,
+                        size: 12,
+                        color: AppColors.mutedForeground,
+                      ),
                     ),
                   ),
               ],
@@ -69,13 +73,17 @@ class AchievementCardComponent extends StatelessWidget {
                   value: progress / 100,
                   minHeight: 6,
                   backgroundColor: AppColors.muted,
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.primary,
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 '$currentUserPoints/${achievement.requiredPoints} pts',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontSize: 10),
               ),
             ],
             if (unlocked) ...[
@@ -88,7 +96,11 @@ class AchievementCardComponent extends StatelessWidget {
                 ),
                 child: const Text(
                   AppStrings.unlocked,
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.success),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.success,
+                  ),
                 ),
               ),
             ],

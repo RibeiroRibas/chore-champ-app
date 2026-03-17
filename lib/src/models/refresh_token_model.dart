@@ -62,4 +62,3 @@ class RefreshTokenModel {
     return utf8.decode(decodedBytes);
   }
 }
-

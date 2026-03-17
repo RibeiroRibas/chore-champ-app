@@ -34,10 +34,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (_formKey.currentState?.validate() != true) return;
     setState(() => _loading = true);
     try {
-      await ref.read(sessionProvider.notifier).login(
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+      await ref
+          .read(sessionProvider.notifier)
+          .login(_emailController.text.trim(), _passwordController.text);
       if (!mounted) return;
       final state = ref.read(sessionProvider).valueOrNull;
       if (state?.needFirstAccess == true) {
@@ -71,9 +70,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 children: [
                   const AuthLogoComponent(),
                   const SizedBox(height: 32),
-                  Text(AppStrings.welcomeBack, style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    AppStrings.welcomeBack,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 4),
-                  Text(AppStrings.signInToAccount, style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    AppStrings.signInToAccount,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   const SizedBox(height: 24),
                   Form(
                     key: _formKey,
@@ -86,9 +91,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           decoration: const InputDecoration(
                             labelText: AppStrings.email,
                             hintText: AppStrings.emailExample,
-                            prefixIcon: Icon(Icons.mail_outline, color: AppColors.mutedForeground, size: 20),
+                            prefixIcon: Icon(
+                              Icons.mail_outline,
+                              color: AppColors.mutedForeground,
+                              size: 20,
+                            ),
                           ),
-                          validator: (v) => (v == null || v.isEmpty) ? 'Informe o e-mail' : null,
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'Informe o e-mail'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         Column(
@@ -97,13 +108,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(AppStrings.password, style: Theme.of(context).textTheme.labelMedium),
+                                Text(
+                                  AppStrings.password,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.labelMedium,
+                                ),
                                 TextButton(
-                                  onPressed: _loading ? null : () => context.go('/forgot-password'),
+                                  onPressed: _loading
+                                      ? null
+                                      : () => context.go('/forgot-password'),
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,
                                     minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   child: const Text(AppStrings.forgotPassword),
                                 ),
@@ -115,17 +134,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               obscureText: _obscurePassword,
                               decoration: InputDecoration(
                                 hintText: '••••••••',
-                                prefixIcon: const Icon(Icons.lock_outline, color: AppColors.mutedForeground, size: 20),
+                                prefixIcon: const Icon(
+                                  Icons.lock_outline,
+                                  color: AppColors.mutedForeground,
+                                  size: 20,
+                                ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                     color: AppColors.mutedForeground,
                                     size: 20,
                                   ),
-                                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
                                 ),
                               ),
-                              validator: (v) => (v == null || v.isEmpty) ? 'Informe a senha' : null,
+                              validator: (v) => (v == null || v.isEmpty)
+                                  ? 'Informe a senha'
+                                  : null,
                             ),
                           ],
                         ),
@@ -138,7 +167,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 ? const SizedBox(
                                     height: 24,
                                     width: 24,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
                                   )
                                 : const Text(AppStrings.signIn),
                           ),

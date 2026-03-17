@@ -38,8 +38,14 @@ ThemeData get appTheme {
       filled: true,
       fillColor: AppColors.muted,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary, width: 2)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       hintStyle: const TextStyle(color: AppColors.mutedForeground),
     ),
@@ -55,10 +61,25 @@ ThemeData get appTheme {
       bodyLarge: TextStyle(color: AppColors.foreground),
       bodyMedium: TextStyle(color: AppColors.foreground),
       bodySmall: TextStyle(color: AppColors.mutedForeground, fontSize: 12),
-      titleLarge: TextStyle(color: AppColors.foreground, fontWeight: FontWeight.bold, fontSize: 22),
-      titleMedium: TextStyle(color: AppColors.foreground, fontWeight: FontWeight.w600, fontSize: 16),
-      titleSmall: TextStyle(color: AppColors.foreground, fontWeight: FontWeight.w600, fontSize: 14),
-      labelLarge: TextStyle(color: AppColors.foreground, fontWeight: FontWeight.w500),
+      titleLarge: TextStyle(
+        color: AppColors.foreground,
+        fontWeight: FontWeight.bold,
+        fontSize: 22,
+      ),
+      titleMedium: TextStyle(
+        color: AppColors.foreground,
+        fontWeight: FontWeight.w600,
+        fontSize: 16,
+      ),
+      titleSmall: TextStyle(
+        color: AppColors.foreground,
+        fontWeight: FontWeight.w600,
+        fontSize: 14,
+      ),
+      labelLarge: TextStyle(
+        color: AppColors.foreground,
+        fontWeight: FontWeight.w500,
+      ),
     ),
   );
 }

@@ -5,20 +5,27 @@ import 'api_exception.dart';
 
 class ApiClient {
   ApiClient({String? baseUrl}) {
-    _dio = Dio(BaseOptions(
-      baseUrl: baseUrl ?? ApiConstants.baseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-    ));
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        if (_accessToken != null) {
-          options.headers['Authorization'] = 'Bearer $_accessToken';
-        }
-        return handler.next(options);
-      },
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl ?? ApiConstants.baseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (_accessToken != null) {
+            options.headers['Authorization'] = 'Bearer $_accessToken';
+          }
+          return handler.next(options);
+        },
+      ),
+    );
   }
 
   late final Dio _dio;
@@ -29,7 +36,10 @@ class ApiClient {
   }
 
   Future<T> get<T>(String path, {Map<String, dynamic>? queryParameters}) async {
-    final response = await _dio.get<dynamic>(path, queryParameters: queryParameters);
+    final response = await _dio.get<dynamic>(
+      path,
+      queryParameters: queryParameters,
+    );
     return response.data as T;
   }
 
@@ -45,6 +55,11 @@ class ApiClient {
   Future<T> put<T>(String path, {dynamic body}) async {
     final response = await _dio.put<dynamic>(path, data: body);
     return response.data as T;
+  }
+
+  /// PUT sem esperar corpo na resposta (ex.: endpoint que não retorna objeto).
+  Future<void> putNoResponse(String path, {dynamic body}) async {
+    await _dio.put<dynamic>(path, data: body);
   }
 
   Future<void> patch(String path, {dynamic body}) async {

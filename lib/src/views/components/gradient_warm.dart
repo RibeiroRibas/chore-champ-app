@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
 class GradientWarm extends StatelessWidget {
-  const GradientWarm({
-    super.key,
-    required this.child,
-    this.borderRadius,
-  });
+  const GradientWarm({super.key, required this.child, this.borderRadius});
 
   final Widget child;
   final BorderRadius? borderRadius;
@@ -18,10 +14,7 @@ class GradientWarm extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFE85D04),
-            Color(0xFFF59E0B),
-          ],
+          colors: [Color(0xFFE85D04), Color(0xFFF59E0B)],
         ),
       ),
       child: child,

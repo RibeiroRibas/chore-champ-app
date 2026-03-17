@@ -19,10 +19,7 @@ class AuthSignUpLinkComponent extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(promptText, style: Theme.of(context).textTheme.bodySmall),
-        TextButton(
-          onPressed: onPressed,
-          child: Text(linkText),
-        ),
+        TextButton(onPressed: onPressed, child: Text(linkText)),
       ],
     );
   }

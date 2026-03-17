@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:chore_champ_app/src/constants/app_colors.dart';
 
 class CardPlayful extends StatelessWidget {
-  const CardPlayful({
-    super.key,
-    required this.child,
-    this.padding,
-  });
+  const CardPlayful({super.key, required this.child, this.padding});
 
   final Widget child;
   final EdgeInsetsGeometry? padding;

@@ -14,36 +14,64 @@ class CreateUserFirstAccessPage extends ConsumerStatefulWidget {
   const CreateUserFirstAccessPage({super.key});
 
   @override
-  ConsumerState<CreateUserFirstAccessPage> createState() => _CreateUserFirstAccessPageState();
+  ConsumerState<CreateUserFirstAccessPage> createState() =>
+      _CreateUserFirstAccessPageState();
 }
 
-class _CreateUserFirstAccessPageState extends ConsumerState<CreateUserFirstAccessPage> {
+class _CreateUserFirstAccessPageState
+    extends ConsumerState<CreateUserFirstAccessPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _familyNameController = TextEditingController();
   final _phoneController = TextEditingController();
   bool _loading = false;
 
+  String get _phoneDigits =>
+      _phoneController.text.replaceAll(RegExp(r'\D'), '');
+
+  bool get _canSubmit {
+    if (_nameController.text.trim().isEmpty) return false;
+    if (_familyNameController.text.trim().isEmpty) return false;
+    if (!isValidCellPhone(_phoneController.text)) return false;
+    return true;
+  }
+
+  void _listenToForm() => setState(() {});
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_listenToForm);
+    _familyNameController.addListener(_listenToForm);
+    _phoneController.addListener(_listenToForm);
+  }
+
   @override
   void dispose() {
+    _nameController.removeListener(_listenToForm);
+    _familyNameController.removeListener(_listenToForm);
+    _phoneController.removeListener(_listenToForm);
     _nameController.dispose();
     _familyNameController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
 
-  String get _phoneDigits => _phoneController.text.replaceAll(RegExp(r'\D'), '');
-
   Future<void> _handleSubmit() async {
     if (_formKey.currentState?.validate() != true) return;
     if (_phoneDigits.length != 11) {
       if (!mounted) return;
-      showGenericErrorSnackBar(context, message: 'Informe o telefone completo.');
+      showGenericErrorSnackBar(
+        context,
+        message: 'Informe o telefone completo.',
+      );
       return;
     }
     setState(() => _loading = true);
     try {
-      await ref.read(sessionProvider.notifier).completeFirstAccess(
+      await ref
+          .read(sessionProvider.notifier)
+          .completeFirstAccess(
             name: _nameController.text.trim(),
             phone: _phoneController.text.trim(),
             familyName: _familyNameController.text.trim(),
@@ -99,9 +127,15 @@ class _CreateUserFirstAccessPageState extends ConsumerState<CreateUserFirstAcces
                           decoration: const InputDecoration(
                             labelText: AppStrings.name,
                             hintText: 'Seu nome',
-                            prefixIcon: Icon(Icons.person_outline, color: AppColors.mutedForeground, size: 20),
+                            prefixIcon: Icon(
+                              Icons.person_outline,
+                              color: AppColors.mutedForeground,
+                              size: 20,
+                            ),
                           ),
-                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe seu nome' : null,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Informe seu nome'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -110,9 +144,15 @@ class _CreateUserFirstAccessPageState extends ConsumerState<CreateUserFirstAcces
                           decoration: const InputDecoration(
                             labelText: AppStrings.familyName,
                             hintText: AppStrings.familyNameHint,
-                            prefixIcon: Icon(Icons.group_outlined, color: AppColors.mutedForeground, size: 20),
+                            prefixIcon: Icon(
+                              Icons.group_outlined,
+                              color: AppColors.mutedForeground,
+                              size: 20,
+                            ),
                           ),
-                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe o nome da família' : null,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Informe o nome da família'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -126,10 +166,15 @@ class _CreateUserFirstAccessPageState extends ConsumerState<CreateUserFirstAcces
                           decoration: const InputDecoration(
                             labelText: AppStrings.phone,
                             hintText: AppStrings.phoneHint,
-                            prefixIcon: Icon(Icons.phone_outlined, color: AppColors.mutedForeground, size: 20),
+                            prefixIcon: Icon(
+                              Icons.phone_outlined,
+                              color: AppColors.mutedForeground,
+                              size: 20,
+                            ),
                           ),
                           validator: (v) {
-                            if (!isValidCellPhone(v)) return 'Informe o telefone no formato (XX) XXXXX-XXXX';
+                            if (!isValidCellPhone(v))
+                              return 'Informe o telefone no formato (XX) XXXXX-XXXX';
                             return null;
                           },
                         ),
@@ -137,12 +182,17 @@ class _CreateUserFirstAccessPageState extends ConsumerState<CreateUserFirstAcces
                         SizedBox(
                           height: 48,
                           child: ElevatedButton(
-                            onPressed: _loading ? null : _handleSubmit,
+                            onPressed: (_loading || !_canSubmit)
+                                ? null
+                                : _handleSubmit,
                             child: _loading
                                 ? const SizedBox(
                                     height: 24,
                                     width: 24,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
                                   )
                                 : const Text(AppStrings.completeRegistration),
                           ),

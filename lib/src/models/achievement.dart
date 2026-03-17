@@ -34,13 +34,13 @@ class Achievement {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'description': description,
-        'emoji': emoji,
-        'requiredPoints': requiredPoints,
-        'unlockedBy': unlockedBy,
-      };
+    'id': id,
+    'title': title,
+    'description': description,
+    'emoji': emoji,
+    'requiredPoints': requiredPoints,
+    'unlockedBy': unlockedBy,
+  };
 
   factory Achievement.fromJson(Map<String, dynamic> json) {
     return Achievement(

@@ -14,7 +14,8 @@ class CreateAccountCodePage extends ConsumerStatefulWidget {
   const CreateAccountCodePage({super.key});
 
   @override
-  ConsumerState<CreateAccountCodePage> createState() => _CreateAccountCodePageState();
+  ConsumerState<CreateAccountCodePage> createState() =>
+      _CreateAccountCodePageState();
 }
 
 class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
@@ -25,8 +26,14 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
   Timer? _resendTimer;
   bool _resendLoading = false;
 
-  String get _email => (GoRouterState.of(context).extra as Map<String, dynamic>?)?['email'] as String? ?? '';
-  String get _password => (GoRouterState.of(context).extra as Map<String, dynamic>?)?['password'] as String? ?? '';
+  String get _email =>
+      (GoRouterState.of(context).extra as Map<String, dynamic>?)?['email']
+          as String? ??
+      '';
+  String get _password =>
+      (GoRouterState.of(context).extra as Map<String, dynamic>?)?['password']
+          as String? ??
+      '';
 
   bool get _canSubmit => _getCodeAsInt() != null;
 
@@ -116,12 +123,17 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
     final code = _getCodeAsInt();
     if (code == null) {
       if (!mounted) return;
-      showGenericErrorSnackBar(context, message: 'Informe o código de 4 dígitos.');
+      showGenericErrorSnackBar(
+        context,
+        message: 'Informe o código de 4 dígitos.',
+      );
       return;
     }
     setState(() => _loading = true);
     try {
-      await ref.read(authProvider.notifier).createAuth(
+      await ref
+          .read(authProvider.notifier)
+          .createAuth(
             email: _email,
             password: _password,
             emailConfirmationCode: code,
@@ -155,7 +167,9 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(
-                      onPressed: _loading ? null : () => context.go('/create-account'),
+                      onPressed: _loading
+                          ? null
+                          : () => context.go('/create-account'),
                       icon: const Icon(Icons.arrow_back, size: 18),
                       label: const Text(AppStrings.backToLogin),
                     ),
@@ -163,7 +177,10 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
                   const SizedBox(height: 16),
                   const AuthLogoComponent(),
                   const SizedBox(height: 32),
-                  Text(AppStrings.enterCode, style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    AppStrings.enterCode,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     AppStrings.enterCodeSentToEmail,
@@ -175,9 +192,9 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
                     Text(
                       _email,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.foreground,
-                          ),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.foreground,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -197,7 +214,8 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
                             maxLength: 1,
                             decoration: const InputDecoration(counterText: ''),
                             onChanged: (v) {
-                              if (v.isNotEmpty && i < 3) _codeFocusNodes[i + 1].requestFocus();
+                              if (v.isNotEmpty && i < 3)
+                                _codeFocusNodes[i + 1].requestFocus();
                             },
                           ),
                         ),
@@ -209,19 +227,27 @@ class _CreateAccountCodePageState extends ConsumerState<CreateAccountCodePage> {
                     height: 48,
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: (_loading || !_canSubmit) ? null : _handleConfirm,
+                      onPressed: (_loading || !_canSubmit)
+                          ? null
+                          : _handleConfirm,
                       child: _loading
                           ? const SizedBox(
                               height: 24,
                               width: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
                             )
                           : const Text(AppStrings.confirmCode),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
-                    onPressed: (_resendSecondsRemaining > 0 || _resendLoading || _email.isEmpty)
+                    onPressed:
+                        (_resendSecondsRemaining > 0 ||
+                            _resendLoading ||
+                            _email.isEmpty)
                         ? null
                         : _handleResendCode,
                     child: _resendLoading

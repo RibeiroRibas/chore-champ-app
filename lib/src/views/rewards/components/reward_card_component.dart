@@ -2,8 +2,8 @@ import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/achievement.dart';
 import 'package:chore_champ_app/src/models/reward.dart';
-import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
-import 'package:chore_champ_app/src/views/widgets/gradient_warm.dart';
+import 'package:chore_champ_app/src/views/components/card_playful.dart';
+import 'package:chore_champ_app/src/views/components/gradient_warm.dart';
 import 'package:flutter/material.dart';
 
 class RewardCardComponent extends StatelessWidget {
@@ -41,12 +41,20 @@ class RewardCardComponent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(reward.title, style: Theme.of(context).textTheme.titleSmall),
-                  Text(reward.description, style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    reward.title,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  Text(
+                    reward.description,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   if (achievement != null)
                     Text(
                       '${AppStrings.requiresAchievement}${achievement!.emoji} ${achievement!.title}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(fontSize: 10),
                     ),
                 ],
               ),
@@ -57,23 +65,38 @@ class RewardCardComponent extends StatelessWidget {
                 if (isAdmin) ...[
                   IconButton(
                     onPressed: onEdit,
-                    icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.mutedForeground),
+                    icon: const Icon(
+                      Icons.edit_outlined,
+                      size: 18,
+                      color: AppColors.mutedForeground,
+                    ),
                   ),
                   IconButton(
                     onPressed: onDelete,
-                    icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.destructive),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      size: 18,
+                      color: AppColors.destructive,
+                    ),
                   ),
                 ],
                 if (claimed)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.success.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
                       AppStrings.claimed,
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.success),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.success,
+                      ),
                     ),
                   )
                 else if (canClaim)
@@ -85,7 +108,10 @@ class RewardCardComponent extends StatelessWidget {
                       child: GradientWarm(
                         borderRadius: BorderRadius.circular(20),
                         child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           child: Text(
                             AppStrings.claimReward,
                             style: TextStyle(
@@ -100,7 +126,10 @@ class RewardCardComponent extends StatelessWidget {
                   )
                 else
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.muted,
                       borderRadius: BorderRadius.circular(20),

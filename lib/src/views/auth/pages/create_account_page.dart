@@ -16,9 +16,7 @@ class CreateAccountPage extends ConsumerStatefulWidget {
   ConsumerState<CreateAccountPage> createState() => _CreateAccountPageState();
 }
 
-final _emailRegex = RegExp(
-  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-);
+final _emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
 
 class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   final _formKey = GlobalKey<FormState>();
@@ -34,7 +32,8 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
     final confirm = _confirmController.text;
     if (email.isEmpty || !_emailRegex.hasMatch(email)) return false;
     if (password.isEmpty || password.length < 6) return false;
-    if (confirm.isEmpty || confirm.length < 6 || confirm != password) return false;
+    if (confirm.isEmpty || confirm.length < 6 || confirm != password)
+      return false;
     return true;
   }
 
@@ -140,7 +139,8 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                           validator: (v) {
                             final value = v?.trim() ?? '';
                             if (value.isEmpty) return 'Informe o e-mail';
-                            if (!_emailRegex.hasMatch(value)) return AppStrings.invalidEmail;
+                            if (!_emailRegex.hasMatch(value))
+                              return AppStrings.invalidEmail;
                             return null;
                           },
                         ),
@@ -209,7 +209,9 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                         SizedBox(
                           height: 48,
                           child: ElevatedButton(
-                            onPressed: (_loading || !_canSubmit) ? null : _handleSendCode,
+                            onPressed: (_loading || !_canSubmit)
+                                ? null
+                                : _handleSendCode,
                             child: _loading
                                 ? const SizedBox(
                                     height: 24,

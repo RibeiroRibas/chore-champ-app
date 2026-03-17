@@ -1,7 +1,7 @@
 import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/family_member.dart';
-import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
+import 'package:chore_champ_app/src/views/components/card_playful.dart';
 import 'package:flutter/material.dart';
 
 class MemberCardComponent extends StatelessWidget {
@@ -42,12 +42,17 @@ class MemberCardComponent extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(member.name, style: Theme.of(context).textTheme.titleSmall),
+                          Text(
+                            member.name,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
                           const SizedBox(width: 6),
                           Icon(
                             member.isAdmin() ? Icons.shield : Icons.person,
                             size: 14,
-                            color: member.isAdmin() ? AppColors.primary : AppColors.mutedForeground,
+                            color: member.isAdmin()
+                                ? AppColors.primary
+                                : AppColors.mutedForeground,
                           ),
                         ],
                       ),
@@ -63,16 +68,27 @@ class MemberCardComponent extends StatelessWidget {
                 if (hasAdminPermission) ...[
                   IconButton(
                     onPressed: onEdit,
-                    icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.mutedForeground),
+                    icon: const Icon(
+                      Icons.edit_outlined,
+                      size: 18,
+                      color: AppColors.mutedForeground,
+                    ),
                   ),
                   IconButton(
                     onPressed: onDelete,
-                    icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.destructive),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      size: 18,
+                      color: AppColors.destructive,
+                    ),
                   ),
                 ],
                 Text(
                   '${member.points} pts',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
                 ),
               ],
             ),

@@ -2,7 +2,7 @@ import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/family_member.dart';
 import 'package:chore_champ_app/src/models/role.dart';
-import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
+import 'package:chore_champ_app/src/views/components/card_playful.dart';
 import 'package:flutter/material.dart';
 
 class LeaderboardRowComponent extends StatelessWidget {
@@ -26,9 +26,9 @@ class LeaderboardRowComponent extends StatelessWidget {
               child: Text(
                 rankDisplay,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.mutedForeground,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.mutedForeground,
+                ),
               ),
             ),
           ),
@@ -39,19 +39,26 @@ class LeaderboardRowComponent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(member.name, style: Theme.of(context).textTheme.titleSmall),
                 Text(
-                member.role == Role.admin
-                    ? AppStrings.roleAdmin
-                    : AppStrings.roleCollaborator,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+                  member.name,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                Text(
+                  member.role == Role.admin
+                      ? AppStrings.roleAdmin
+                      : AppStrings.roleCollaborator,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ],
             ),
           ),
           Text(
             '${member.points} pts',
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
           ),
         ],
       ),

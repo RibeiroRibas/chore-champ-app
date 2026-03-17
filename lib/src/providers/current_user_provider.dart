@@ -15,4 +15,6 @@ class CurrentUserIdNotifier extends Notifier<String> {
   }
 }
 
-final currentUserIdProvider = NotifierProvider<CurrentUserIdNotifier, String>(CurrentUserIdNotifier.new);
+final currentUserIdProvider = NotifierProvider<CurrentUserIdNotifier, String>(
+  CurrentUserIdNotifier.new,
+);

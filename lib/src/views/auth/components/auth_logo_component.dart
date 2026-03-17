@@ -17,12 +17,20 @@ class AuthLogoComponent extends StatelessWidget {
             color: AppColors.primary,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Icon(Icons.emoji_events, color: AppColors.primaryForeground, size: 28),
+          child: const Icon(
+            Icons.emoji_events,
+            color: AppColors.primaryForeground,
+            size: 28,
+          ),
         ),
         const SizedBox(width: 8),
         Text(
           AppStrings.appName,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.foreground),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppColors.foreground,
+          ),
         ),
       ],
     );

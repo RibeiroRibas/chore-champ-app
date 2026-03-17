@@ -32,13 +32,19 @@ class AppHeader extends ConsumerWidget {
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(Icons.emoji_events, color: AppColors.primaryForeground, size: 16),
+              child: const Icon(
+                Icons.emoji_events,
+                color: AppColors.primaryForeground,
+                size: 16,
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 AppStrings.appName,
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: 18),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium!.copyWith(fontSize: 18),
               ),
             ),
             currentMember.when(

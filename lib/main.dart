@@ -55,7 +55,11 @@ class _SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.cleaning_services, size: 64, color: Theme.of(context).colorScheme.primary),
+            Icon(
+              Icons.cleaning_services,
+              size: 64,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(height: 24),
             const CircularProgressIndicator(),
           ],

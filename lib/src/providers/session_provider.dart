@@ -150,7 +150,8 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
 
   Future<void> _getCurrentUser(LoginResult loginResult) async {
     final user = await ref.read(userProvider.notifier).getCurrentUser();
-    ref.read(currentUserIdProvider.notifier)
+    ref
+        .read(currentUserIdProvider.notifier)
         .setCurrentUserId(user.id.toString());
     state = AsyncData(
       SessionState(
@@ -169,7 +170,9 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
         .read(authProvider.notifier)
         .login(email, password);
     ref.read(apiClientProvider).setAccessToken(loginResult.accessToken);
-    await ref.read(sessionStorageProvider).setRefreshToken(loginResult.refreshToken);
+    await ref
+        .read(sessionStorageProvider)
+        .setRefreshToken(loginResult.refreshToken);
     return loginResult;
   }
 
@@ -186,14 +189,19 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
         needFirstAccess: false,
       ),
     );
-    ref.read(currentUserIdProvider.notifier)
+    ref
+        .read(currentUserIdProvider.notifier)
         .setCurrentUserId(user.id.toString());
     await _persistSession();
     await ref.read(sessionStorageProvider).setCurrentUserId(user.id.toString());
     _invalidateFamilyScopedProviders();
   }
 
-  Future<ApiCurrentUser> _completeFirstAccess(String name, String phone, String familyName) async {
+  Future<ApiCurrentUser> _completeFirstAccess(
+    String name,
+    String phone,
+    String familyName,
+  ) async {
     final userNotifier = ref.read(userProvider.notifier);
     await userNotifier.createCurrentUser(
       name: name,

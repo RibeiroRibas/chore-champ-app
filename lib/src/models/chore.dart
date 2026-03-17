@@ -10,6 +10,8 @@ class Chore {
     required this.assignedTo,
     required this.createdBy,
     required this.completed,
+    this.isRecurring = false,
+    this.recurrenceDayIds = const [],
   });
 
   final String id;
@@ -19,6 +21,8 @@ class Chore {
   final String? assignedTo;
   final String createdBy;
   final bool completed;
+  final bool isRecurring;
+  final List<int> recurrenceDayIds;
 
   Chore copyWith({
     String? id,
@@ -28,6 +32,8 @@ class Chore {
     String? assignedTo,
     String? createdBy,
     bool? completed,
+    bool? isRecurring,
+    List<int>? recurrenceDayIds,
   }) {
     return Chore(
       id: id ?? this.id,
@@ -37,10 +43,17 @@ class Chore {
       assignedTo: assignedTo ?? this.assignedTo,
       createdBy: createdBy ?? this.createdBy,
       completed: completed ?? this.completed,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurrenceDayIds: recurrenceDayIds ?? this.recurrenceDayIds,
     );
   }
 
   factory Chore.fromApiJson(Map<String, dynamic> json) {
+    final recurrenceRaw = json['recurrence_day_ids'];
+    List<int> recurrenceDayIds = const [];
+    if (recurrenceRaw is List) {
+      recurrenceDayIds = recurrenceRaw.map((e) => (e as num).toInt()).toList();
+    }
     return Chore(
       id: (json['id'] as num).toString(),
       title: json['title'] as String,
@@ -51,26 +64,29 @@ class Chore {
           : null,
       createdBy: (json['created_by'] as num).toString(),
       completed: json['completed'] as bool,
+      isRecurring: json['is_recurring'] as bool? ?? false,
+      recurrenceDayIds: recurrenceDayIds,
     );
   }
 
-  bool canEdit( FamilyMember currentUser) =>
+  bool canEdit(FamilyMember currentUser) =>
       currentUser.role == Role.admin || createdBy == currentUser.id;
 
   bool canDelete(FamilyMember currentUser) =>
       currentUser.role == Role.admin || createdBy == currentUser.id;
 
   bool canAssignToMe(FamilyMember currentUser) =>
-      !completed && !canRemoveAssignment(currentUser) && (currentUser.role == Role.admin || assignedTo == null);
+      !completed &&
+      !canRemoveAssignment(currentUser) &&
+      (currentUser.role == Role.admin || assignedTo == null);
 
   bool canRemoveAssignment(FamilyMember currentUser) =>
       !completed &&
-          assignedTo != null &&
-          (currentUser.role == Role.admin || assignedTo == currentUser.id);
+      assignedTo != null &&
+      (currentUser.role == Role.admin || assignedTo == currentUser.id);
 
-  /// Botão "Concluir": só aparece se a tarefa estiver atribuída e (admin ou current user é o responsável).
   bool canComplete(FamilyMember currentUser) =>
       !completed &&
-          assignedTo != null &&
-          (currentUser.role == Role.admin || assignedTo == currentUser.id);
+      assignedTo != null &&
+      (currentUser.role == Role.admin || assignedTo == currentUser.id);
 }

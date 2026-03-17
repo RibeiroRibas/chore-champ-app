@@ -19,7 +19,11 @@ class UserNotifier extends Notifier<void> {
     required String phone,
     required String familyName,
   }) async {
-    await _user.createCurrentUser(name: name, phone: phone, familyName: familyName);
+    await _user.createCurrentUser(
+      name: name,
+      phone: phone,
+      familyName: familyName,
+    );
   }
 }
 

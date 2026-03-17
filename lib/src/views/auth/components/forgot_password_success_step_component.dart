@@ -21,12 +21,23 @@ class ForgotPasswordSuccessStepComponent extends StatelessWidget {
             color: AppColors.secondary.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.check_circle, color: AppColors.secondary, size: 32),
+          child: const Icon(
+            Icons.check_circle,
+            color: AppColors.secondary,
+            size: 32,
+          ),
         ),
         const SizedBox(height: 24),
-        Text(AppStrings.codeVerified, style: Theme.of(context).textTheme.titleLarge),
+        Text(
+          AppStrings.codeVerified,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         const SizedBox(height: 4),
-        Text(AppStrings.passwordResetSuccess, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
+        Text(
+          AppStrings.passwordResetSuccess,
+          style: Theme.of(context).textTheme.bodySmall,
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: 24),
         SizedBox(
           height: 48,

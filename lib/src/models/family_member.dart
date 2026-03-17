@@ -92,6 +92,10 @@ class FamilyMember {
 
   bool isIdPresent() => id.isNotEmpty;
 
-  bool isPresent() => name.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && isValidCellPhone(phoneNumber) && emailRegex.hasMatch(email);
-
+  bool isPresent() =>
+      name.isNotEmpty &&
+      email.isNotEmpty &&
+      phoneNumber.isNotEmpty &&
+      isValidCellPhone(phoneNumber) &&
+      emailRegex.hasMatch(email);
 }

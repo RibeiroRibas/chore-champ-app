@@ -1,7 +1,7 @@
 import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/models/achievement.dart';
 import 'package:chore_champ_app/src/models/family_member.dart';
-import 'package:chore_champ_app/src/views/widgets/card_playful.dart';
+import 'package:chore_champ_app/src/views/components/card_playful.dart';
 import 'package:flutter/material.dart';
 
 class NextAchievementCardComponent extends StatelessWidget {
@@ -30,8 +30,14 @@ class NextAchievementCardComponent extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(nextAchievement.title, style: Theme.of(context).textTheme.titleSmall),
-                    Text(nextAchievement.description, style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      nextAchievement.title,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    Text(
+                      nextAchievement.description,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),
@@ -44,7 +50,9 @@ class NextAchievementCardComponent extends StatelessWidget {
               value: progress / 100,
               minHeight: 10,
               backgroundColor: AppColors.muted,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
             ),
           ),
           const SizedBox(height: 6),

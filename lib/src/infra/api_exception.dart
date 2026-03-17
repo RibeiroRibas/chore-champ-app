@@ -6,5 +6,6 @@ class ApiException implements Exception {
   final String? message;
 
   @override
-  String toString() => 'ApiException(statusCode: $statusCode, code: $code, message: $message)';
+  String toString() =>
+      'ApiException(statusCode: $statusCode, code: $code, message: $message)';
 }

@@ -9,6 +9,7 @@ class ApiCurrentUser {
     required this.roleName,
     required this.phoneNumber,
     required this.family,
+    this.availablePoints = 0,
   });
 
   final int id;
@@ -18,6 +19,7 @@ class ApiCurrentUser {
   final String roleName;
   final String phoneNumber;
   final ApiCurrentUserFamily family;
+  final int availablePoints;
 
   factory ApiCurrentUser.fromJson(Map<String, dynamic> json) {
     final role = json['role'] as Map<String, dynamic>? ?? {};
@@ -32,15 +34,17 @@ class ApiCurrentUser {
       family: familyJson != null
           ? ApiCurrentUserFamily.fromJson(familyJson)
           : ApiCurrentUserFamily(id: 0, name: ''),
+      availablePoints: (json['available_points'] as num?)?.toInt() ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'auth_id': authId,
-    'role': {'id': roleId, 'name': roleName},
-    'phone_number': phoneNumber,
-    'family': family.toJson(),
-  };
+        'id': id,
+        'name': name,
+        'auth_id': authId,
+        'role': {'id': roleId, 'name': roleName},
+        'phone_number': phoneNumber,
+        'family': family.toJson(),
+        'available_points': availablePoints,
+      };
 }

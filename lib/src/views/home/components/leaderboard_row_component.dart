@@ -1,7 +1,5 @@
 import 'package:chore_champ_app/src/constants/app_colors.dart';
-import 'package:chore_champ_app/src/constants/app_strings.dart';
-import 'package:chore_champ_app/src/models/family_member.dart';
-import 'package:chore_champ_app/src/models/role.dart';
+import 'package:chore_champ_app/src/models/ranking_member.dart';
 import 'package:chore_champ_app/src/views/components/card_playful.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +10,7 @@ class LeaderboardRowComponent extends StatelessWidget {
     required this.rankDisplay,
   });
 
-  final FamilyMember member;
+  final RankingMember member;
   final String rankDisplay;
 
   @override
@@ -44,9 +42,7 @@ class LeaderboardRowComponent extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 Text(
-                  member.role == Role.admin
-                      ? AppStrings.roleAdmin
-                      : AppStrings.roleCollaborator,
+                  member.roleName,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],

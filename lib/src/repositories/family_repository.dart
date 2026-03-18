@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:chore_champ_app/src/infra/api_client.dart';
 import 'package:chore_champ_app/src/models/family_member.dart';
+import 'package:chore_champ_app/src/models/ranking_member.dart';
 
 class FamilyRepository {
   FamilyRepository(this._client);
@@ -26,6 +27,18 @@ class FamilyRepository {
     try {
       final data = await _client.get<dynamic>('$_basePath/$memberId');
       return FamilyMember.fromApiJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response != null) _client.throwFromResponse(e.response!);
+      rethrow;
+    }
+  }
+
+  Future<List<RankingMember>> fetchRanking() async {
+    try {
+      final data = await _client.get<List<dynamic>>('$_basePath/ranking');
+      return data
+          .map((e) => RankingMember.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;

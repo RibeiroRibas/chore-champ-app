@@ -4,8 +4,10 @@ import 'package:chore_champ_app/src/models/paginated_chores_response.dart';
 import 'package:chore_champ_app/src/providers/states/chores_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'current_member_provider.dart';
 import 'members_provider.dart';
 import 'repositories_provider.dart';
+import 'family_ranking_provider.dart';
 
 class ChoresNotifier extends AsyncNotifier<ChoresState> {
   @override
@@ -53,9 +55,22 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     } catch (_) {
       return;
     }
+    final newCompletedValue = !chore.completed;
+
     final repo = ref.read(choreRepositoryProvider);
-    await repo.updateChore(chore.copyWith(completed: !chore.completed));
+    await repo.updateChore(
+      chore.copyWith(
+        completed: newCompletedValue,
+      ),
+    );
     ref.invalidate(membersProvider);
+
+    // When completing a chore, refresh points + family ranking header/home.
+    if (newCompletedValue) {
+      ref.invalidate(familyRankingProvider);
+      ref.invalidate(currentMemberProvider);
+    }
+
     final newList = await repo.fetchTodayChores();
     state = AsyncData(
       ChoresState(
@@ -154,6 +169,10 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
         allPaginated: current!.allPaginated,
       ),
     );
+
+    // After completing a chore, points and ranking must be refreshed.
+    ref.invalidate(familyRankingProvider);
+    ref.invalidate(currentMemberProvider);
   }
 
   Future<void> deleteChore(String choreId) async {

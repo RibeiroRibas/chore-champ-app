@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/achievement.dart';
-import 'package:chore_champ_app/src/models/family_member.dart';
 import 'package:chore_champ_app/src/providers/achievements_provider.dart';
 import 'package:chore_champ_app/src/providers/chores_provider.dart';
+import 'package:chore_champ_app/src/providers/family_ranking_provider.dart';
 import 'package:chore_champ_app/src/providers/members_provider.dart';
 import 'package:chore_champ_app/src/views/home/components/dashboard_greeting_component.dart';
 import 'package:chore_champ_app/src/views/home/components/dashboard_my_tasks_component.dart';
@@ -30,13 +30,11 @@ class HomePage extends ConsumerWidget {
             final myChores = chores
                 .where((c) => c.assignedTo == currentMember.id && !c.completed)
                 .toList();
-            final completedToday = chores.where((c) => c.completed).length;
-            final totalChores = chores.length;
+            final completedToday = chores.where((c) => c.completed && c.assignedTo == currentMember.id).length;
+            final totalChores = chores.where((c) => c.assignedTo == currentMember.id).length;
 
             return membersAsync.when(
-              data: (members) {
-                final sortedMembers = List<FamilyMember>.from(members)
-                  ..sort((a, b) => b.points.compareTo(a.points));
+              data: (_) {
                 return achievementsAsync.when(
                   data: (achievements) {
                     Achievement? nextAchievement;
@@ -53,8 +51,6 @@ class HomePage extends ConsumerWidget {
                                   100)
                               .clamp(0.0, 100.0)
                         : 100.0;
-
-                    const medals = ['🥇', '🥈', '🥉'];
 
                     return SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(
@@ -85,18 +81,7 @@ class HomePage extends ConsumerWidget {
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                           const SizedBox(height: 12),
-                          ...sortedMembers.asMap().entries.map((entry) {
-                            final i = entry.key;
-                            final member = entry.value;
-                            final rankDisplay = i < 3 ? medals[i] : '${i + 1}';
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: LeaderboardRowComponent(
-                                member: member,
-                                rankDisplay: rankDisplay,
-                              ),
-                            );
-                          }),
+                          _RankingSection(),
                           const SizedBox(height: 80),
                         ],
                       ),
@@ -119,6 +104,35 @@ class HomePage extends ConsumerWidget {
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text(AppStrings.errorGeneric)),
+    );
+  }
+}
+
+class _RankingSection extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    const medals = ['🥇', '🥈', '🥉'];
+    final rankingAsync = ref.watch(familyRankingProvider);
+
+    return rankingAsync.when(
+      data: (ranking) {
+        return Column(
+          children: ranking.asMap().entries.map((entry) {
+            final i = entry.key;
+            final member = entry.value;
+            final rankDisplay = i < 3 ? medals[i] : '${i + 1}';
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: LeaderboardRowComponent(
+                member: member,
+                rankDisplay: rankDisplay,
+              ),
+            );
+          }).toList(),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Text(AppStrings.errorGeneric),
     );
   }
 }

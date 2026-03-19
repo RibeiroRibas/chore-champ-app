@@ -65,7 +65,6 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     );
     ref.invalidate(membersProvider);
 
-    // When completing a chore, refresh points + family ranking header/home.
     if (newCompletedValue) {
       ref.invalidate(familyRankingProvider);
       ref.invalidate(currentMemberProvider);
@@ -170,7 +169,6 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       ),
     );
 
-    // After completing a chore, points and ranking must be refreshed.
     ref.invalidate(familyRankingProvider);
     ref.invalidate(currentMemberProvider);
   }

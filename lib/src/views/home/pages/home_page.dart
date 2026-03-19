@@ -41,7 +41,7 @@ class HomePage extends ConsumerWidget {
                     try {
                       nextAchievement = achievements.firstWhere(
                         (a) =>
-                            !a.unlockedBy.contains(currentMember.id) &&
+                            a.acquiredTimes == 0 &&
                             a.requiredPoints > currentMember.points,
                       );
                     } catch (_) {}

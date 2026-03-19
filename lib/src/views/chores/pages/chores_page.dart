@@ -14,6 +14,7 @@ import 'package:chore_champ_app/src/views/chores/components/chore_card_component
 import 'package:chore_champ_app/src/views/chores/components/chore_form_dialog_component.dart';
 import 'package:chore_champ_app/src/views/components/rounded_dropdown_component.dart';
 import 'package:chore_champ_app/src/views/components/confirm_action_dialog.dart';
+import 'package:chore_champ_app/src/views/components/empty_chores_card_component.dart';
 import 'package:chore_champ_app/src/views/components/gradient_warm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -286,71 +287,88 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              ChoiceChip(
-                                label: const Text(AppStrings.filterToday),
-                                selected: _tab == ChoresTab.today,
-                                selectedColor: AppColors.primary,
-                                labelStyle: TextStyle(
-                                  color: _tab == ChoresTab.today
-                                      ? AppColors.primaryForeground
-                                      : AppColors.mutedForeground,
-                                  fontSize: 12,
-                                ),
-                                onSelected: (_) {
+                          DefaultTabController(
+                            length: 2,
+                            initialIndex: _tab == ChoresTab.today ? 0 : 1,
+                            child: TabBar(
+                              onTap: (index) {
+                                if (index == 0) {
                                   setState(() => _tab = ChoresTab.today);
-                                },
+                                  return;
+                                }
+                                setState(() => _tab = ChoresTab.all);
+                                _loadAllChoresWithCurrentFilters();
+                              },
+                              isScrollable: false,
+                              dividerColor: Colors.transparent,
+                              indicatorColor: AppColors.primary,
+                              indicatorWeight: 3,
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              labelColor: AppColors.foreground,
+                              unselectedLabelColor: AppColors.mutedForeground,
+                              labelStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
                               ),
-                              const SizedBox(width: 8),
-                              ChoiceChip(
-                                label: const Text(AppStrings.filterAll),
-                                selected: _tab == ChoresTab.all,
-                                selectedColor: AppColors.primary,
-                                labelStyle: TextStyle(
-                                  color: _tab == ChoresTab.all
-                                      ? AppColors.primaryForeground
-                                      : AppColors.mutedForeground,
-                                  fontSize: 12,
-                                ),
-                                onSelected: (_) {
-                                  setState(() => _tab = ChoresTab.all);
-                                  _loadAllChoresWithCurrentFilters();
-                                },
+                              unselectedLabelStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
                               ),
-                            ],
+                              labelPadding: const EdgeInsets.only(
+                                bottom: 6,
+                              ),
+                              tabs: const [
+                                Tab(text: AppStrings.filterToday),
+                                Tab(text: AppStrings.filterAll),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 24),
                           if (_tab == ChoresTab.today) ...[
                             Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 ChoiceChip(
-                                  label: Text(AppStrings.filterMine),
+                                  label: const Text(AppStrings.filterMine),
                                   selected: _todayFilter == TodayFilter.mine,
                                   selectedColor: AppColors.primary,
                                   labelStyle: TextStyle(
                                     color: _todayFilter == TodayFilter.mine
                                         ? AppColors.primaryForeground
                                         : AppColors.mutedForeground,
-                                    fontSize: 12,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
                                   ),
+                                  visualDensity: const VisualDensity(
+                                    horizontal: -2,
+                                    vertical: -2,
+                                  ),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                   onSelected: (_) {
                                     setState(
                                       () => _todayFilter = TodayFilter.mine,
                                     );
                                   },
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 16),
                                 ChoiceChip(
-                                  label: Text(AppStrings.filterAll),
+                                  label: const Text(AppStrings.filterAll),
                                   selected: _todayFilter == TodayFilter.all,
                                   selectedColor: AppColors.primary,
                                   labelStyle: TextStyle(
                                     color: _todayFilter == TodayFilter.all
                                         ? AppColors.primaryForeground
                                         : AppColors.mutedForeground,
-                                    fontSize: 12,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
                                   ),
+                                  visualDensity: const VisualDensity(
+                                    horizontal: -2,
+                                    vertical: -2,
+                                  ),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                   onSelected: (_) {
                                     setState(
                                       () => _todayFilter = TodayFilter.all,
@@ -472,6 +490,15 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                             ),
                           ],
                           const SizedBox(height: 16),
+                          if (_tab == ChoresTab.today && sourceChores.isEmpty) ...[
+                            EmptyChoresCardComponent(
+                              actionLabel: AppStrings.addChore,
+                              onActionPressed: () => setState(() {
+                                _editingChore = null;
+                                _showChoreForm = true;
+                              }),
+                            ),
+                          ],
                           ...pending.map(
                             (chore) => ChoreCardComponent(
                               chore: chore,

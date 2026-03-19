@@ -147,10 +147,7 @@ class _RewardsPageState extends ConsumerState<RewardsPage> {
                                 );
                               } catch (_) {}
                               final achievementUnlocked =
-                                  achievement?.unlockedBy.contains(
-                                    currentMember.id,
-                                  ) ??
-                                  false;
+                                  (achievement?.acquiredTimes ?? 0) > 0;
                               final claimed = reward.claimedBy.contains(
                                 currentMember.id,
                               );

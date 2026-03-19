@@ -38,7 +38,7 @@ class AchievementsPage extends ConsumerWidget {
                   itemCount: achievements.length,
                   itemBuilder: (context, i) {
                     final a = achievements[i];
-                    final unlocked = a.unlockedBy.contains(currentMember.id);
+                    final unlocked = currentMember.points >= a.requiredPoints;
                     final progress =
                         (currentMember.points / a.requiredPoints * 100).clamp(
                           0.0,
@@ -49,6 +49,7 @@ class AchievementsPage extends ConsumerWidget {
                       unlocked: unlocked,
                       progress: progress,
                       currentUserPoints: currentMember.points,
+                      acquiredTimes: a.acquiredTimes,
                     );
                   },
                 ),

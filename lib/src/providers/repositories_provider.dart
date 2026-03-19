@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 
 final achievementRepositoryProvider = Provider<AchievementRepository>(
-  (ref) => AchievementRepository(),
+  (ref) => AchievementRepository(ref.watch(apiClientProvider)),
 );
 
 final authRepositoryProvider = Provider<AuthRepository>(

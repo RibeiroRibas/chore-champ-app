@@ -73,6 +73,7 @@ Sempre que o fluxo for **adicionar** ou **atualizar** um registro na API, use um
 - Repositórios devem ser classes simples injetadas via um `Provider` básico (Ex: `final repoProvider = Provider((ref) => MyRepository());`).
 - **Não chame repositórios diretamente nas páginas/views.** Use sempre os providers de domínio: `auth_provider` para operações de autenticação (enviar código, criar auth, login) e `user_provider` para operações de usuário (obter/criar usuário atual). Use `session_provider` para fluxo de sessão (login, primeiro acesso, logout).
 - Trate erros de API/Banco de dados dentro do Repositório ou no AsyncNotifier, nunca no Widget.
+- **Tratamento de erros em repositórios que chamam a API:** Todo método do repositório que faz chamada HTTP (via `ApiClient`/Dio) deve envolver a chamada em `try { ... } on DioException catch (e) { if (e.response != null) _client.throwFromResponse(e.response!); rethrow; }`. Assim, respostas de erro da API são convertidas em `ApiException` pelo `throwFromResponse`, e falhas de rede ou outras exceções são repassadas com `rethrow`. Importe `package:dio/dio.dart` para usar `DioException`.
 
 ### Views de Auth vs User
 - Mantenha views de **autenticação** (login, criar conta, código, esqueci senha) em `views/auth/`.

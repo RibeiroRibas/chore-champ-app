@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/infra/api_error_presentation.dart';
 import 'package:chore_champ_app/src/models/family_member.dart';
+import 'package:chore_champ_app/src/models/ranking_member.dart';
 import 'package:chore_champ_app/src/providers/achievements_provider.dart';
 import 'package:chore_champ_app/src/providers/chores_provider.dart';
+import 'package:chore_champ_app/src/providers/family_ranking_provider.dart';
 import 'package:chore_champ_app/src/views/components/confirm_action_dialog.dart';
 import 'package:chore_champ_app/src/views/family/components/member_card_component.dart';
 import 'package:chore_champ_app/src/views/family/components/member_form_dialog_component.dart'
@@ -104,6 +106,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
     final membersAsync = ref.watch(membersProvider);
     final choresAsync = ref.watch(choresProvider);
     final achievementsAsync = ref.watch(achievementsProvider);
+    final rankingAsync = ref.watch(familyRankingProvider);
 
     return currentMember.when(
       data: (currentMember) => membersAsync.when(
@@ -113,7 +116,9 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
               data: (chores) {
                 return achievementsAsync.when(
                   data: (achievements) {
-                    return Stack(
+                    return rankingAsync.when(
+                      data: (ranking) {
+                        return Stack(
                       children: [
                         SingleChildScrollView(
                           padding: const EdgeInsets.symmetric(
@@ -143,19 +148,29 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
                               ),
                               const SizedBox(height: 16),
                               ...members.map((member) {
+                                final memberRanking = ranking.firstWhere(
+                                  (r) => r.id.toString() == member.id,
+                                  orElse: () => const RankingMember(
+                                    id: 0,
+                                    name: '',
+                                    points: 0,
+                                    roleName: '',
+                                    avatar: '👤',
+                                  ),
+                                );
+                                final memberPoints = memberRanking.points;
+                                final unlockedAchievements = achievements
+                                    .where((a) => memberPoints >= a.requiredPoints)
+                                    .length;
+
                                 final memberChores = chores
                                     .where((c) => c.assignedTo == member.id)
                                     .toList();
                                 final completedChores = memberChores
                                     .where((c) => c.completed)
                                     .length;
-                                final unlockedAchievements = achievements
-                                    .where(
-                                      (a) => a.unlockedBy.contains(member.id),
-                                    )
-                                    .length;
                                 return MemberCardComponent(
-                                  member: member,
+                                  member: member.copyWith(points: memberPoints),
                                   tasksCount: memberChores.length,
                                   completedCount: completedChores,
                                   achievementsCount: unlockedAchievements,
@@ -189,9 +204,14 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
                           ),
                       ],
                     );
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (e, _) =>
+                          Center(child: Text(AppStrings.errorGeneric)),
+                    );
                   },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => const Center(child: CircularProgressIndicator()),
                   error: (e, _) => _buildMembersErrorWidget(context, e, ref),
                 );
               },

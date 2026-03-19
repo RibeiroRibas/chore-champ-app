@@ -5,7 +5,7 @@ class Achievement {
     required this.description,
     required this.emoji,
     required this.requiredPoints,
-    required this.unlockedBy,
+    required this.acquiredTimes,
   });
 
   final String id;
@@ -13,7 +13,7 @@ class Achievement {
   final String description;
   final String emoji;
   final int requiredPoints;
-  final List<String> unlockedBy;
+  final int acquiredTimes;
 
   Achievement copyWith({
     String? id,
@@ -21,7 +21,7 @@ class Achievement {
     String? description,
     String? emoji,
     int? requiredPoints,
-    List<String>? unlockedBy,
+    int? acquiredTimes,
   }) {
     return Achievement(
       id: id ?? this.id,
@@ -29,7 +29,7 @@ class Achievement {
       description: description ?? this.description,
       emoji: emoji ?? this.emoji,
       requiredPoints: requiredPoints ?? this.requiredPoints,
-      unlockedBy: unlockedBy ?? this.unlockedBy,
+      acquiredTimes: acquiredTimes ?? this.acquiredTimes,
     );
   }
 
@@ -39,17 +39,17 @@ class Achievement {
     'description': description,
     'emoji': emoji,
     'requiredPoints': requiredPoints,
-    'unlockedBy': unlockedBy,
+    'acquiredTimes': acquiredTimes,
   };
 
   factory Achievement.fromJson(Map<String, dynamic> json) {
     return Achievement(
-      id: json['id'] as String,
+      id: (json['id'] as num).toInt().toString(),
       title: json['title'] as String,
       description: json['description'] as String,
       emoji: json['emoji'] as String,
-      requiredPoints: (json['requiredPoints'] as num).toInt(),
-      unlockedBy: (json['unlockedBy'] as List<dynamic>).cast<String>(),
+      requiredPoints: (json['required_points'] as num? ?? json['requiredPoints'] as num).toInt(),
+      acquiredTimes: (json['acquired_times'] as num?)?.toInt() ?? 0,
     );
   }
 }

@@ -37,6 +37,7 @@ class _ChoreFormDialogComponentState
   late String _emoji;
   late int _points;
   String? _assignedToUserId;
+  late bool _completed;
   late bool _isRecurring;
   late List<int> _selectedDayIds;
 
@@ -50,6 +51,7 @@ class _ChoreFormDialogComponentState
       _emoji = widget.chore!.emoji;
       _points = widget.chore!.points;
       _assignedToUserId = widget.chore!.assignedTo;
+      _completed = widget.chore!.completed;
       _isRecurring = widget.chore!.isRecurring;
       _selectedDayIds = List<int>.from(widget.chore!.recurrenceDayIds);
     } else {
@@ -57,6 +59,7 @@ class _ChoreFormDialogComponentState
       _emoji = '🧹';
       _points = 10;
       _assignedToUserId = null;
+      _completed = false;
       _isRecurring = false;
       _selectedDayIds = [];
     }
@@ -233,6 +236,13 @@ class _ChoreFormDialogComponentState
                     contentPadding: EdgeInsets.zero,
                     controlAffinity: ListTileControlAffinity.leading,
                   ),
+                  CheckboxListTile(
+                    value: _completed,
+                    onChanged: (v) => setState(() => _completed = v ?? false),
+                    title: const Text(AppStrings.completed),
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
                   if (_isRecurring) ...[
                     const SizedBox(height: 8),
                     Text(
@@ -324,6 +334,7 @@ class _ChoreFormDialogComponentState
         emoji: _emoji.trim().isEmpty ? '🧹' : _emoji.trim(),
         points: _points,
         assignedTo: _assignedToUserId,
+        completed: _completed,
         isRecurring: _isRecurring,
         recurrenceDayIds: _selectedDayIds,
       );
@@ -335,7 +346,7 @@ class _ChoreFormDialogComponentState
       points: _points,
       assignedTo: _assignedToUserId,
       createdBy: widget.currentMember.id,
-      completed: false,
+      completed: _completed,
       isRecurring: _isRecurring,
       recurrenceDayIds: _selectedDayIds,
     );

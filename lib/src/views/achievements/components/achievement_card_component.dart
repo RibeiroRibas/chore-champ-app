@@ -11,12 +11,14 @@ class AchievementCardComponent extends StatelessWidget {
     required this.unlocked,
     required this.progress,
     required this.currentUserPoints,
+    required this.acquiredTimes,
   });
 
   final Achievement achievement;
   final bool unlocked;
   final double progress;
   final int currentUserPoints;
+  final int acquiredTimes;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,23 @@ class AchievementCardComponent extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (acquiredTimes > 0)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 2,
+                  alignment: WrapAlignment.center,
+                  children: List.generate(
+                    acquiredTimes,
+                    (_) => const Icon(
+                      Icons.star,
+                      size: 12,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
             Stack(
               clipBehavior: Clip.none,
               children: [

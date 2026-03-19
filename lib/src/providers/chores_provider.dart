@@ -110,6 +110,9 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
         allPaginated: AsyncData(results[1] as PaginatedChoresResponse),
       ),
     );
+
+    ref.invalidate(familyRankingProvider);
+    ref.invalidate(currentMemberProvider);
   }
 
   Future<void> updateChore(Chore chore) async {
@@ -123,6 +126,9 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
         allPaginated: current!.allPaginated,
       ),
     );
+
+    ref.invalidate(familyRankingProvider);
+    ref.invalidate(currentMemberProvider);
   }
 
   Future<void> assignChoreToMe(String choreId) async {

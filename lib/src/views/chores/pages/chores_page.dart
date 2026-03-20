@@ -43,6 +43,19 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
   String? _assignDialogSelectedMemberId;
 
   final TextEditingController _titleController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  static const double _loadMoreScrollThreshold = 160;
+
+  void _onScrollLoadMore() {
+    if (_tab != ChoresTab.all) return;
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    final remaining = position.maxScrollExtent - position.pixels;
+    if (remaining <= _loadMoreScrollThreshold) {
+      ref.read(choresProvider.notifier).loadNextPageAllChores();
+    }
+  }
 
   static String _getMemberName(String? id, List<FamilyMember> members) {
     if (id == null) return AppStrings.unassigned;
@@ -210,7 +223,15 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScrollLoadMore);
+  }
+
+  @override
   void dispose() {
+    _scrollController.removeListener(_onScrollLoadMore);
+    _scrollController.dispose();
     _titleController.dispose();
     super.dispose();
   }
@@ -248,6 +269,7 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                 return Stack(
                   children: [
                     SingleChildScrollView(
+                      controller: _scrollController,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 20,
@@ -567,6 +589,16 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                 onToggle: () => ref
                                     .read(choresProvider.notifier)
                                     .toggleComplete(chore.id),
+                              ),
+                            ),
+                          ],
+                          if (_tab == ChoresTab.all &&
+                              choresState.isLoadingMoreAllChores) ...[
+                            const SizedBox(height: 16),
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: CircularProgressIndicator(),
                               ),
                             ),
                           ],

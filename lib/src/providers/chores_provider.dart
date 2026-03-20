@@ -23,8 +23,13 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
   Future<void> loadAllChores() async {
     final current = state.valueOrNull;
     if (current == null) return;
+    ref.read(allChoresFiltersProvider.notifier).setPage(1);
     state = AsyncData(
-      ChoresState(today: current.today, allPaginated: const AsyncLoading()),
+      ChoresState(
+        today: current.today,
+        allPaginated: const AsyncLoading(),
+        isLoadingMoreAllChores: false,
+      ),
     );
     try {
       final filters = ref.read(allChoresFiltersProvider);
@@ -33,14 +38,84 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       final updated = state.valueOrNull;
       if (updated != null) {
         state = AsyncData(
-          ChoresState(today: updated.today, allPaginated: AsyncData(resp)),
+          ChoresState(
+            today: updated.today,
+            allPaginated: AsyncData(resp),
+            isLoadingMoreAllChores: false,
+          ),
         );
       }
     } catch (e, st) {
       final updated = state.valueOrNull;
       if (updated != null) {
         state = AsyncData(
-          ChoresState(today: updated.today, allPaginated: AsyncError(e, st)),
+          ChoresState(
+            today: updated.today,
+            allPaginated: AsyncError(e, st),
+            isLoadingMoreAllChores: false,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> loadNextPageAllChores() async {
+    final current = state.valueOrNull;
+    if (current == null || current.isLoadingMoreAllChores) return;
+
+    final paginatedAsync = current.allPaginated;
+    if (paginatedAsync.isLoading) return;
+
+    final paginated = paginatedAsync.valueOrNull;
+    if (paginated == null) return;
+    if (paginated.totalPages == 0 || paginated.page >= paginated.totalPages) {
+      return;
+    }
+
+    state = AsyncData(
+      ChoresState(
+        today: current.today,
+        allPaginated: paginatedAsync,
+        isLoadingMoreAllChores: true,
+      ),
+    );
+
+    try {
+      final nextPage = paginated.page + 1;
+      final filters =
+          ref.read(allChoresFiltersProvider).copyWith(page: nextPage);
+      final repo = ref.read(choreRepositoryProvider);
+      final resp = await repo.fetchAllChores(filters);
+
+      ref.read(allChoresFiltersProvider.notifier).setPage(resp.page);
+
+      final merged = PaginatedChoresResponse(
+        items: [...paginated.items, ...resp.items],
+        totalItems: resp.totalItems,
+        page: resp.page,
+        pageSize: resp.pageSize,
+        totalPages: resp.totalPages,
+      );
+
+      final updated = state.valueOrNull;
+      if (updated != null) {
+        state = AsyncData(
+          ChoresState(
+            today: updated.today,
+            allPaginated: AsyncData(merged),
+            isLoadingMoreAllChores: false,
+          ),
+        );
+      }
+    } catch (_) {
+      final updated = state.valueOrNull;
+      if (updated != null) {
+        state = AsyncData(
+          ChoresState(
+            today: updated.today,
+            allPaginated: updated.allPaginated,
+            isLoadingMoreAllChores: false,
+          ),
         );
       }
     }
@@ -77,6 +152,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       ChoresState(
         today: AsyncData(newList),
         allPaginated: current!.allPaginated,
+        isLoadingMoreAllChores: current.isLoadingMoreAllChores,
       ),
     );
   }
@@ -94,6 +170,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       ChoresState(
         today: AsyncData(newList),
         allPaginated: current!.allPaginated,
+        isLoadingMoreAllChores: current.isLoadingMoreAllChores,
       ),
     );
   }
@@ -101,6 +178,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
   Future<void> addChore(Chore chore) async {
     final repo = ref.read(choreRepositoryProvider);
     await repo.addChore(chore);
+    ref.read(allChoresFiltersProvider.notifier).setPage(1);
     final filters = ref.read(allChoresFiltersProvider);
     final results = await Future.wait([
       repo.fetchTodayChores(),
@@ -127,6 +205,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       ChoresState(
         today: AsyncData(newList),
         allPaginated: current!.allPaginated,
+        isLoadingMoreAllChores: current.isLoadingMoreAllChores,
       ),
     );
 
@@ -141,6 +220,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     if (list == null) return;
     final repo = ref.read(choreRepositoryProvider);
     await repo.assignChoreToMe(choreId);
+    ref.read(allChoresFiltersProvider.notifier).setPage(1);
     final filters = ref.read(allChoresFiltersProvider);
     final results = await Future.wait([
       repo.fetchTodayChores(),
@@ -150,6 +230,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       ChoresState(
         today: AsyncData(results[0] as List<Chore>),
         allPaginated: AsyncData(results[1] as PaginatedChoresResponse),
+        isLoadingMoreAllChores: false,
       ),
     );
   }
@@ -160,6 +241,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     if (list == null) return;
     final repo = ref.read(choreRepositoryProvider);
     await repo.removeAssignChoreToMe(choreId);
+    ref.read(allChoresFiltersProvider.notifier).setPage(1);
     final filters = ref.read(allChoresFiltersProvider);
     final results = await Future.wait([
       repo.fetchTodayChores(),
@@ -169,6 +251,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       ChoresState(
         today: AsyncData(results[0] as List<Chore>),
         allPaginated: AsyncData(results[1] as PaginatedChoresResponse),
+        isLoadingMoreAllChores: false,
       ),
     );
   }
@@ -184,6 +267,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       ChoresState(
         today: AsyncData(newList),
         allPaginated: current!.allPaginated,
+        isLoadingMoreAllChores: current.isLoadingMoreAllChores,
       ),
     );
 
@@ -201,6 +285,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       ChoresState(
         today: AsyncData(newList),
         allPaginated: current!.allPaginated,
+        isLoadingMoreAllChores: current.isLoadingMoreAllChores,
       ),
     );
   }

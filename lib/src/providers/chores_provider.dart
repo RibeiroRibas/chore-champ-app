@@ -1,6 +1,7 @@
 import 'package:chore_champ_app/src/filters/all_chores_filters_provider.dart';
 import 'package:chore_champ_app/src/models/chore.dart';
 import 'package:chore_champ_app/src/models/paginated_chores_response.dart';
+import 'package:chore_champ_app/src/providers/rewards_provider.dart';
 import 'package:chore_champ_app/src/providers/states/chores_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -68,6 +69,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     if (newCompletedValue) {
       ref.invalidate(familyRankingProvider);
       ref.invalidate(currentMemberProvider);
+      ref.invalidate(rewardsProvider);
     }
 
     final newList = await repo.fetchTodayChores();
@@ -113,6 +115,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
 
     ref.invalidate(familyRankingProvider);
     ref.invalidate(currentMemberProvider);
+    ref.invalidate(rewardsProvider);
   }
 
   Future<void> updateChore(Chore chore) async {
@@ -129,6 +132,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
 
     ref.invalidate(familyRankingProvider);
     ref.invalidate(currentMemberProvider);
+    ref.invalidate(rewardsProvider);
   }
 
   Future<void> assignChoreToMe(String choreId) async {
@@ -136,12 +140,16 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     final list = current?.today.valueOrNull;
     if (list == null) return;
     final repo = ref.read(choreRepositoryProvider);
-    final updated = await repo.assignChoreToMe(choreId);
-    final newList = list.map((c) => c.id == choreId ? updated : c).toList();
+    await repo.assignChoreToMe(choreId);
+    final filters = ref.read(allChoresFiltersProvider);
+    final results = await Future.wait([
+      repo.fetchTodayChores(),
+      repo.fetchAllChores(filters),
+    ]);
     state = AsyncData(
       ChoresState(
-        today: AsyncData(newList),
-        allPaginated: current!.allPaginated,
+        today: AsyncData(results[0] as List<Chore>),
+        allPaginated: AsyncData(results[1] as PaginatedChoresResponse),
       ),
     );
   }
@@ -151,12 +159,16 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     final list = current?.today.valueOrNull;
     if (list == null) return;
     final repo = ref.read(choreRepositoryProvider);
-    final updated = await repo.removeAssignChoreToMe(choreId);
-    final newList = list.map((c) => c.id == choreId ? updated : c).toList();
+    await repo.removeAssignChoreToMe(choreId);
+    final filters = ref.read(allChoresFiltersProvider);
+    final results = await Future.wait([
+      repo.fetchTodayChores(),
+      repo.fetchAllChores(filters),
+    ]);
     state = AsyncData(
       ChoresState(
-        today: AsyncData(newList),
-        allPaginated: current!.allPaginated,
+        today: AsyncData(results[0] as List<Chore>),
+        allPaginated: AsyncData(results[1] as PaginatedChoresResponse),
       ),
     );
   }
@@ -177,6 +189,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
 
     ref.invalidate(familyRankingProvider);
     ref.invalidate(currentMemberProvider);
+    ref.invalidate(rewardsProvider);
   }
 
   Future<void> deleteChore(String choreId) async {

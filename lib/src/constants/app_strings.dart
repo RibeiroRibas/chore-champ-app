@@ -150,6 +150,13 @@ class AppStrings {
   static const String noAchievementsAvailable = 'Nenhuma conquista disponível';
   static const String requiresAchievement = 'Exige: ';
   static const String claimReward = 'Resgatar';
+  static const String claimRewardConfirmationTitle = 'Confirmar resgate?';
+  static const String claimRewardConfirmationDescriptionTemplate =
+      'Ao resgatar, %s pontos serao consumidos do seu saldo disponivel.';
+  static const String rewardClaimedSuccess = 'Recompensa resgatada com sucesso.';
+  static const String rewardCelebrationTitle = 'Recompensa resgatada!';
+  static const String rewardCelebrationMessage =
+      'Boa! Voce celebrou mais uma conquista. Continue assim! 🎉';
 
   // Family
   static const String familyMembers = 'Membros da família';

@@ -5,7 +5,7 @@ class AllChoresFilters {
     this.completed = false,
     this.assignedToUserId,
     this.page = 1,
-    this.pageSize = 50,
+    this.pageSize = 20,
   });
 
   final String title;

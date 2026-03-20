@@ -40,5 +40,5 @@ final memberRepositoryProvider = Provider<FamilyRepository>(
 );
 
 final rewardRepositoryProvider = Provider<RewardRepository>(
-  (ref) => RewardRepository(),
+  (ref) => RewardRepository(ref.watch(apiClientProvider)),
 );

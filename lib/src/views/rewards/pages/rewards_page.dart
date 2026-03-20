@@ -1,4 +1,6 @@
 import 'package:chore_champ_app/src/providers/current_member_provider.dart';
+import 'package:chore_champ_app/src/infra/api_error_presentation.dart';
+import 'package:chore_champ_app/src/infra/api_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,7 +9,9 @@ import 'package:chore_champ_app/src/models/achievement.dart';
 import 'package:chore_champ_app/src/models/reward.dart';
 import 'package:chore_champ_app/src/providers/achievements_provider.dart';
 import 'package:chore_champ_app/src/providers/rewards_provider.dart';
+import 'package:chore_champ_app/src/views/components/confirm_action_dialog.dart';
 import 'package:chore_champ_app/src/views/rewards/components/delete_reward_dialog_component.dart';
+import 'package:chore_champ_app/src/views/rewards/components/reward_claim_celebration_component.dart';
 import 'package:chore_champ_app/src/views/rewards/components/reward_card_component.dart';
 import 'package:chore_champ_app/src/views/rewards/components/reward_form_dialog_component.dart';
 
@@ -20,8 +24,10 @@ class RewardsPage extends ConsumerStatefulWidget {
 
 class _RewardsPageState extends ConsumerState<RewardsPage> {
   bool _dialogOpen = false;
+  bool _showClaimCelebration = false;
   Reward? _editingReward;
   String? _deleteId;
+  String? _claimRewardId;
   String _title = '';
   String _description = '';
   String _emoji = '🎁';
@@ -73,7 +79,6 @@ class _RewardsPageState extends ConsumerState<RewardsPage> {
               description: _description.trim(),
               emoji: _emoji,
               achievementId: _achievementId,
-              claimedBy: [],
             ),
           );
     }
@@ -84,6 +89,28 @@ class _RewardsPageState extends ConsumerState<RewardsPage> {
     if (_deleteId != null) {
       ref.read(rewardsProvider.notifier).deleteReward(_deleteId!);
       setState(() => _deleteId = null);
+    }
+  }
+
+  Future<void> _handleConfirmClaim() async {
+    final rewardId = _claimRewardId;
+    if (rewardId == null) return;
+    try {
+      await ref.read(rewardsProvider.notifier).claimReward(rewardId);
+      ref.invalidate(currentMemberProvider);
+      if (!mounted) return;
+      setState(() {
+        _claimRewardId = null;
+        _showClaimCelebration = true;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      showApiErrorSnackBar(context, e);
+    } catch (_) {
+      if (!mounted) return;
+      showGenericErrorSnackBar(context);
+    } finally {
+      if (mounted) setState(() => _claimRewardId = null);
     }
   }
 
@@ -146,25 +173,19 @@ class _RewardsPageState extends ConsumerState<RewardsPage> {
                                   (a) => a.id == reward.achievementId,
                                 );
                               } catch (_) {}
-                              final achievementUnlocked =
-                                  (achievement?.acquiredTimes ?? 0) > 0;
-                              final claimed = reward.claimedBy.contains(
-                                currentMember.id,
-                              );
-                              final canClaim = achievementUnlocked && !claimed;
+                              final canClaim = reward.unlocked;
 
                               return RewardCardComponent(
                                 reward: reward,
                                 achievement: achievement,
-                                claimed: claimed,
+                                claimed: false,
                                 canClaim: canClaim,
                                 isAdmin: currentMember.isAdmin(),
                                 onEdit: () => _openEdit(reward),
                                 onDelete: () =>
                                     setState(() => _deleteId = reward.id),
-                                onClaim: () => ref
-                                    .read(rewardsProvider.notifier)
-                                    .claimReward(reward.id, currentMember.id),
+                                onClaim: () =>
+                                    setState(() => _claimRewardId = reward.id),
                               );
                             }),
                           const SizedBox(height: 80),
@@ -195,6 +216,28 @@ class _RewardsPageState extends ConsumerState<RewardsPage> {
                       DeleteRewardDialogComponent(
                         onCancel: () => setState(() => _deleteId = null),
                         onConfirm: _handleDelete,
+                      ),
+                    if (_claimRewardId != null)
+                      ConfirmActionDialog(
+                        title: AppStrings.claimRewardConfirmationTitle,
+                        description: AppStrings
+                            .claimRewardConfirmationDescriptionTemplate
+                            .replaceFirst(
+                              '%s',
+                              (rewards.firstWhere((r) => r.id == _claimRewardId!)
+                                      .requiredPoints)
+                                  .toString(),
+                            ),
+                        confirmLabel: AppStrings.claimReward,
+                        confirmButtonDestructive: false,
+                        onCancel: () => setState(() => _claimRewardId = null),
+                        onConfirm: _handleConfirmClaim,
+                      ),
+                    if (_showClaimCelebration)
+                      RewardClaimCelebrationComponent(
+                        onClose: () => setState(
+                          () => _showClaimCelebration = false,
+                        ),
                       ),
                   ],
                 );

@@ -5,7 +5,8 @@ class Reward {
     required this.description,
     required this.emoji,
     required this.achievementId,
-    required this.claimedBy,
+    this.requiredPoints = 0,
+    this.unlocked = false,
   });
 
   final String id;
@@ -13,7 +14,8 @@ class Reward {
   final String description;
   final String emoji;
   final String achievementId;
-  final List<String> claimedBy;
+  final int requiredPoints;
+  final bool unlocked;
 
   Reward copyWith({
     String? id,
@@ -21,7 +23,8 @@ class Reward {
     String? description,
     String? emoji,
     String? achievementId,
-    List<String>? claimedBy,
+    int? requiredPoints,
+    bool? unlocked,
   }) {
     return Reward(
       id: id ?? this.id,
@@ -29,7 +32,8 @@ class Reward {
       description: description ?? this.description,
       emoji: emoji ?? this.emoji,
       achievementId: achievementId ?? this.achievementId,
-      claimedBy: claimedBy ?? this.claimedBy,
+      requiredPoints: requiredPoints ?? this.requiredPoints,
+      unlocked: unlocked ?? this.unlocked,
     );
   }
 
@@ -39,17 +43,19 @@ class Reward {
     'description': description,
     'emoji': emoji,
     'achievementId': achievementId,
-    'claimedBy': claimedBy,
+    'requiredPoints': requiredPoints,
+    'unlocked': unlocked,
   };
 
   factory Reward.fromJson(Map<String, dynamic> json) {
     return Reward(
-      id: json['id'] as String,
+      id: (json['id'] as num).toInt().toString(),
       title: json['title'] as String,
-      description: json['description'] as String,
+      description: (json['subtitle'] as String?) ?? '',
       emoji: json['emoji'] as String,
-      achievementId: json['achievementId'] as String,
-      claimedBy: (json['claimedBy'] as List<dynamic>).cast<String>(),
+      achievementId: (json['achievement_id'] as num).toInt().toString(),
+      requiredPoints: (json['required_points'] as num?)?.toInt() ?? 0,
+      unlocked: json['unlocked'] as bool? ?? false,
     );
   }
 }

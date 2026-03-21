@@ -42,9 +42,13 @@ class MemberCardComponent extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            member.name,
-                            style: Theme.of(context).textTheme.titleSmall,
+                          Expanded(
+                            child: Text(
+                              member.name,
+                              style: Theme.of(context).textTheme.titleSmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const SizedBox(width: 6),
                           Icon(
@@ -67,6 +71,11 @@ class MemberCardComponent extends StatelessWidget {
                 ),
                 if (hasAdminPermission) ...[
                   IconButton(
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    padding: EdgeInsets.zero,
                     onPressed: onEdit,
                     icon: const Icon(
                       Icons.edit_outlined,
@@ -75,6 +84,11 @@ class MemberCardComponent extends StatelessWidget {
                     ),
                   ),
                   IconButton(
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    padding: EdgeInsets.zero,
                     onPressed: onDelete,
                     icon: const Icon(
                       Icons.delete_outline,

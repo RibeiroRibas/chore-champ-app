@@ -40,17 +40,15 @@ class MemberCardComponent extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        member.name,
+                        style: Theme.of(context).textTheme.titleSmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
                       Row(
                         children: [
-                          Expanded(
-                            child: Text(
-                              member.name,
-                              style: Theme.of(context).textTheme.titleSmall,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
                           Icon(
                             member.isAdmin() ? Icons.shield : Icons.person,
                             size: 14,
@@ -58,13 +56,18 @@ class MemberCardComponent extends StatelessWidget {
                                 ? AppColors.primary
                                 : AppColors.mutedForeground,
                           ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              member.isAdmin()
+                                  ? AppStrings.roleAdmin
+                                  : AppStrings.roleCollaborator,
+                              style: Theme.of(context).textTheme.bodySmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
-                      ),
-                      Text(
-                        member.isAdmin()
-                            ? AppStrings.roleAdmin
-                            : AppStrings.roleCollaborator,
-                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),

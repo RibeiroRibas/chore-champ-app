@@ -1,6 +1,8 @@
 import 'package:chore_champ_app/src/providers/current_member_provider.dart';
+import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/infra/api_error_presentation.dart';
 import 'package:chore_champ_app/src/infra/api_exception.dart';
+import 'package:chore_champ_app/src/views/components/gradient_warm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -144,10 +146,24 @@ class _RewardsPageState extends ConsumerState<RewardsPage> {
                                 style: Theme.of(context).textTheme.titleLarge,
                               ),
                               if (currentMember.isAdmin())
-                                TextButton.icon(
-                                  onPressed: () => _openCreate(achievements),
-                                  icon: const Icon(Icons.add, size: 18),
-                                  label: const Text(AppStrings.add),
+                                Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () => _openCreate(achievements),
+                                    borderRadius: BorderRadius.circular(24),
+                                    child: GradientWarm(
+                                      borderRadius: BorderRadius.circular(24),
+                                      child: const SizedBox(
+                                        width: 40,
+                                        height: 40,
+                                        child: Icon(
+                                          Icons.add,
+                                          color: AppColors.primaryForeground,
+                                          size: 22,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                             ],
                           ),

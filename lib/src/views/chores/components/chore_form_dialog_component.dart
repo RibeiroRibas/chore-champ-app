@@ -375,6 +375,11 @@ class _ChoreFormDialogComponentState
   }
 
   Chore _buildChore() {
+    final days = ref.read(daysOfWeekProvider).valueOrNull ?? [];
+    final recurrenceDays = _selectedDayIds
+        .map((id) => days.firstWhere((d) => d.id == id))
+        .toList();
+
     if (_isEdit) {
       return widget.chore!.copyWith(
         title: _title.trim(),
@@ -383,7 +388,7 @@ class _ChoreFormDialogComponentState
         assignedTo: _assignedToUserId,
         completed: _completed,
         isRecurring: _isRecurring,
-        recurrenceDayIds: _selectedDayIds,
+        recurrenceDays: recurrenceDays,
       );
     }
     return Chore(
@@ -395,7 +400,7 @@ class _ChoreFormDialogComponentState
       createdBy: widget.currentMember.id,
       completed: _completed,
       isRecurring: _isRecurring,
-      recurrenceDayIds: _selectedDayIds,
+      recurrenceDays: recurrenceDays,
     );
   }
 }

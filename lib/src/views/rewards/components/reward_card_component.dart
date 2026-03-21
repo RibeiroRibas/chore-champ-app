@@ -59,27 +59,10 @@ class RewardCardComponent extends StatelessWidget {
                 ],
               ),
             ),
-            Row(
+            Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (isAdmin) ...[
-                  IconButton(
-                    onPressed: onEdit,
-                    icon: const Icon(
-                      Icons.edit_outlined,
-                      size: 18,
-                      color: AppColors.mutedForeground,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: onDelete,
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      size: 18,
-                      color: AppColors.destructive,
-                    ),
-                  ),
-                ],
                 if (claimed)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -139,6 +122,40 @@ class RewardCardComponent extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
+                if (isAdmin) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        constraints: const BoxConstraints(
+                          minWidth: 36,
+                          minHeight: 36,
+                        ),
+                        padding: EdgeInsets.zero,
+                        onPressed: onEdit,
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: AppColors.mutedForeground,
+                        ),
+                      ),
+                      IconButton(
+                        constraints: const BoxConstraints(
+                          minWidth: 36,
+                          minHeight: 36,
+                        ),
+                        padding: EdgeInsets.zero,
+                        onPressed: onDelete,
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          size: 18,
+                          color: AppColors.destructive,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ],

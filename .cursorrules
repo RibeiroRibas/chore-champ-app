@@ -83,7 +83,7 @@ Sempre que o fluxo for **adicionar** ou **atualizar** um registro na API, use um
 - Use **`const`** construtores sempre que possível para performance.
 - Nomeação de arquivos: `snake_case.dart`.
 - Nomeação de classes: `PascalCase`.
-- **Sem comentários no código** (`//`, `/* */`, `///`): não adicionar comentários no código-fonte. Preferir **nomes claros** (variáveis, funções, métodos, getters, classes, parâmetros nomeados) que expliquem o propósito; extrair métodos ou widgets com nomes descritivos em vez de comentar o fluxo.
+- **Sem comentários no código (regra obrigatória para a IA):** não adicionar `//`, `/* */`, `///` nem blocos de documentação no código-fonte Dart. Preferir **nomes claros** e extração de métodos/widgets; documentação operacional (ex.: IP de dev) fica em `README.md`, não em comentários no código.
 - Erros e Estados Vazios: Sempre trate estados de `.loading` e `.error` ao consumir `AsyncValue`.
 - **Imports:** Use sempre o path absoluto do package. Nunca use imports relativos que começam com `../` ou `./`. Exemplo: em vez de `import '../../../constants/app_colors.dart';`, use `import 'package:chore_champ_app/src/constants/app_colors.dart';`.
 
@@ -91,18 +91,16 @@ Sempre que o fluxo for **adicionar** ou **atualizar** um registro na API, use um
 Ao criar um novo recurso, siga este padrão:
 
 ```dart
-// 1. Model
 class Item { ... }
 
-// 2. Repository
 class ItemRepository {
   Future<List<Item>> fetchItems() async { ... }
 }
 final itemRepositoryProvider = Provider((ref) => ItemRepository());
 
-// 3. Provider
 class ItemListNotifier extends AsyncNotifier<List<Item>> {
   @override
   Future<List<Item>> build() => ref.read(itemRepositoryProvider).fetchItems();
 }
 final itemListProvider = AsyncNotifierProvider<ItemListNotifier, List<Item>>(ItemListNotifier.new);
+```

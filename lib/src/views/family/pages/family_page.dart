@@ -1,3 +1,4 @@
+import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/infra/api_exception.dart';
 import 'package:chore_champ_app/src/providers/current_member_provider.dart';
 import 'package:chore_champ_app/src/providers/members_provider.dart';
@@ -12,6 +13,7 @@ import 'package:chore_champ_app/src/providers/achievements_provider.dart';
 import 'package:chore_champ_app/src/providers/chores_provider.dart';
 import 'package:chore_champ_app/src/providers/family_ranking_provider.dart';
 import 'package:chore_champ_app/src/views/components/confirm_action_dialog.dart';
+import 'package:chore_champ_app/src/views/components/gradient_warm.dart';
 import 'package:chore_champ_app/src/views/family/components/member_card_component.dart';
 import 'package:chore_champ_app/src/views/family/components/member_form_dialog_component.dart'
     show MemberFormDialogComponent;
@@ -119,91 +121,117 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
                     return rankingAsync.when(
                       data: (ranking) {
                         return Stack(
-                      children: [
-                        SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 20,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                          children: [
+                            SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 20,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    AppStrings.familyMembers,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleLarge,
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        AppStrings.familyMembers,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleLarge,
+                                      ),
+                                      if (currentMember.isAdmin())
+                                        Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            onTap: _openCreate,
+                                            borderRadius: BorderRadius.circular(
+                                              24,
+                                            ),
+                                            child: GradientWarm(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                              child: const SizedBox(
+                                                width: 40,
+                                                height: 40,
+                                                child: Icon(
+                                                  Icons.add,
+                                                  color: AppColors
+                                                      .primaryForeground,
+                                                  size: 22,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                  if (currentMember.isAdmin())
-                                    TextButton.icon(
-                                      onPressed: _openCreate,
-                                      icon: const Icon(Icons.add, size: 18),
-                                      label: const Text(AppStrings.add),
-                                    ),
+                                  const SizedBox(height: 16),
+                                  ...members.map((member) {
+                                    final memberRanking = ranking.firstWhere(
+                                      (r) => r.id.toString() == member.id,
+                                      orElse: () => const RankingMember(
+                                        id: 0,
+                                        name: '',
+                                        points: 0,
+                                        roleName: '',
+                                        avatar: '👤',
+                                      ),
+                                    );
+                                    final memberPoints = memberRanking.points;
+                                    final unlockedAchievements = achievements
+                                        .where(
+                                          (a) =>
+                                              memberPoints >= a.requiredPoints,
+                                        )
+                                        .length;
+
+                                    final memberChores = chores
+                                        .where((c) => c.assignedTo == member.id)
+                                        .toList();
+                                    final completedChores = memberChores
+                                        .where((c) => c.completed)
+                                        .length;
+                                    return MemberCardComponent(
+                                      member: member.copyWith(
+                                        points: memberPoints,
+                                      ),
+                                      tasksCount: memberChores.length,
+                                      completedCount: completedChores,
+                                      achievementsCount: unlockedAchievements,
+                                      onEdit: () => _openEdit(member),
+                                      onDelete: () =>
+                                          setState(() => _deleteId = member.id),
+                                      hasAdminPermission: currentMember
+                                          .isAdmin(),
+                                    );
+                                  }),
+                                  const SizedBox(height: 80),
                                 ],
                               ),
-                              const SizedBox(height: 16),
-                              ...members.map((member) {
-                                final memberRanking = ranking.firstWhere(
-                                  (r) => r.id.toString() == member.id,
-                                  orElse: () => const RankingMember(
-                                    id: 0,
-                                    name: '',
-                                    points: 0,
-                                    roleName: '',
-                                    avatar: '👤',
-                                  ),
-                                );
-                                final memberPoints = memberRanking.points;
-                                final unlockedAchievements = achievements
-                                    .where((a) => memberPoints >= a.requiredPoints)
-                                    .length;
-
-                                final memberChores = chores
-                                    .where((c) => c.assignedTo == member.id)
-                                    .toList();
-                                final completedChores = memberChores
-                                    .where((c) => c.completed)
-                                    .length;
-                                return MemberCardComponent(
-                                  member: member.copyWith(points: memberPoints),
-                                  tasksCount: memberChores.length,
-                                  completedCount: completedChores,
-                                  achievementsCount: unlockedAchievements,
-                                  onEdit: () => _openEdit(member),
-                                  onDelete: () =>
-                                      setState(() => _deleteId = member.id),
-                                  hasAdminPermission: currentMember.isAdmin(),
-                                );
-                              }),
-                              const SizedBox(height: 80),
-                            ],
-                          ),
-                        ),
-                        if (_dialogOpen)
-                          MemberFormDialogComponent(
-                            formKey: _memberFormKey,
-                            member: member,
-                            onCancel: () => setState(() => _dialogOpen = false),
-                            onSave: _handleSave,
-                            onResendPassword: member != null
-                                ? _handleResendPassword
-                                : null,
-                            resendPasswordLoading: _resendPasswordLoading,
-                          ),
-                        if (_deleteId != null)
-                          ConfirmActionDialog(
-                            title: AppStrings.deleteMember,
-                            description: AppStrings.deleteMemberDescription,
-                            onCancel: () => setState(() => _deleteId = null),
-                            onConfirm: _handleDelete,
-                          ),
-                      ],
-                    );
+                            ),
+                            if (_dialogOpen)
+                              MemberFormDialogComponent(
+                                formKey: _memberFormKey,
+                                member: member,
+                                onCancel: () =>
+                                    setState(() => _dialogOpen = false),
+                                onSave: _handleSave,
+                                onResendPassword: member != null
+                                    ? _handleResendPassword
+                                    : null,
+                                resendPasswordLoading: _resendPasswordLoading,
+                              ),
+                            if (_deleteId != null)
+                              ConfirmActionDialog(
+                                title: AppStrings.deleteMember,
+                                description: AppStrings.deleteMemberDescription,
+                                onCancel: () =>
+                                    setState(() => _deleteId = null),
+                                onConfirm: _handleDelete,
+                              ),
+                          ],
+                        );
                       },
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
@@ -211,7 +239,8 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
                           Center(child: Text(AppStrings.errorGeneric)),
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, _) => _buildMembersErrorWidget(context, e, ref),
                 );
               },

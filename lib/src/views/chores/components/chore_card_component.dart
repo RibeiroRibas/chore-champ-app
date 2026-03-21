@@ -45,147 +45,181 @@ class ChoreCardComponent extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Opacity(
           opacity: completed ? 0.6 : 1,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: onToggle,
-                      icon: Icon(
-                        Icons.check_circle,
-                        color: completed
-                            ? AppColors.success
-                            : AppColors.mutedForeground,
-                        size: 22,
-                      ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: onToggle,
+                          icon: Icon(
+                            Icons.check_circle,
+                            color: completed
+                                ? AppColors.success
+                                : AppColors.mutedForeground,
+                            size: 22,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 24,
+                          child: Text(
+                            chore.emoji,
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                chore.title,
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(
+                                      decoration: completed
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                    ),
+                              ),
+                              Text(
+                                assignedToName,
+                                style: Theme.of(context).textTheme.bodySmall,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '+${chore.points}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: completed
+                                ? AppColors.mutedForeground
+                                : AppColors.primary,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(
-                      width: 24,
-                      child: Text(
-                        chore.emoji,
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    children: [
+                      Row(
                         mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            chore.title,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  decoration: completed
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                ),
-                          ),
-                          Text(
-                            assignedToName,
-                            style: Theme.of(context).textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          if (showEdit && !completed)
+                            IconButton(
+                              onPressed: onEdit,
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                size: 18,
+                                color: AppColors.mutedForeground,
+                              ),
+                              style: IconButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(24, 24),
+                              ),
+                            ),
+                          if (showDelete)
+                            IconButton(
+                              onPressed: onDelete,
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                size: 18,
+                                color: AppColors.destructive,
+                              ),
+                              style: IconButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(24, 24),
+                              ),
+                            ),
                         ],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '+${chore.points}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: completed
-                            ? AppColors.mutedForeground
-                            : AppColors.primary,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (showAssignToMe && !completed)
+                            IconButton(
+                              onPressed: onAssignToMe,
+                              icon: const Icon(
+                                Icons.person_add_outlined,
+                                size: 18,
+                                color: AppColors.mutedForeground,
+                              ),
+                              style: IconButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(24, 24),
+                              ),
+                            ),
+                          if (showRemoveAssignment && !completed)
+                            IconButton(
+                              onPressed: onRemoveAssignment,
+                              icon: const Icon(
+                                Icons.person_remove_outlined,
+                                size: 18,
+                                color: AppColors.mutedForeground,
+                              ),
+                              style: IconButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(24, 24),
+                              ),
+                            ),
+                          if (showComplete && !completed)
+                            IconButton(
+                              onPressed: onComplete,
+                              icon: const Icon(
+                                Icons.check_circle_outline,
+                                size: 18,
+                                color: AppColors.mutedForeground,
+                              ),
+                              style: IconButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(24, 24),
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (showEdit && !completed)
-                        IconButton(
-                          onPressed: onEdit,
-                          icon: const Icon(
-                            Icons.edit_outlined,
-                            size: 18,
-                            color: AppColors.mutedForeground,
-                          ),
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(24, 24),
-                          ),
-                        ),
-                      if (showDelete)
-                        IconButton(
-                          onPressed: onDelete,
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            size: 18,
-                            color: AppColors.destructive,
-                          ),
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(24, 24),
-                          ),
-                        ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (showAssignToMe && !completed)
-                        IconButton(
-                          onPressed: onAssignToMe,
-                          icon: const Icon(
-                            Icons.person_add_outlined,
-                            size: 18,
-                            color: AppColors.mutedForeground,
-                          ),
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(24, 24),
-                          ),
-                        ),
-                      if (showRemoveAssignment && !completed)
-                        IconButton(
-                          onPressed: onRemoveAssignment,
-                          icon: const Icon(
-                            Icons.person_remove_outlined,
-                            size: 18,
-                            color: AppColors.mutedForeground,
-                          ),
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(24, 24),
-                          ),
-                        ),
-                      if (showComplete && !completed)
-                        IconButton(
-                          onPressed: onComplete,
-                          icon: const Icon(
-                            Icons.check_circle_outline,
-                            size: 18,
-                            color: AppColors.mutedForeground,
-                          ),
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(24, 24),
-                          ),
-                        ),
                     ],
                   ),
                 ],
               ),
+              if (chore.isRecurring && chore.recurrenceDays.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 14,
+                        color: AppColors.mutedForeground,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          chore.recurrenceDays.map((d) => d.name).join(' · '),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.mutedForeground,
+                                    fontSize: 11,
+                                  ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),

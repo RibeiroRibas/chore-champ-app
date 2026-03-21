@@ -1,3 +1,4 @@
+import 'package:chore_champ_app/src/models/day_of_week.dart';
 import 'package:chore_champ_app/src/models/family_member.dart';
 import 'package:chore_champ_app/src/models/role.dart';
 
@@ -11,7 +12,7 @@ class Chore {
     required this.createdBy,
     required this.completed,
     this.isRecurring = false,
-    this.recurrenceDayIds = const [],
+    this.recurrenceDays = const [],
   });
 
   final String id;
@@ -22,7 +23,11 @@ class Chore {
   final String createdBy;
   final bool completed;
   final bool isRecurring;
-  final List<int> recurrenceDayIds;
+
+  final List<DayOfWeek> recurrenceDays;
+
+  List<int> get recurrenceDayIds =>
+      recurrenceDays.map((d) => d.id).toList();
 
   Chore copyWith({
     String? id,
@@ -33,7 +38,7 @@ class Chore {
     String? createdBy,
     bool? completed,
     bool? isRecurring,
-    List<int>? recurrenceDayIds,
+    List<DayOfWeek>? recurrenceDays,
   }) {
     return Chore(
       id: id ?? this.id,
@@ -44,16 +49,19 @@ class Chore {
       createdBy: createdBy ?? this.createdBy,
       completed: completed ?? this.completed,
       isRecurring: isRecurring ?? this.isRecurring,
-      recurrenceDayIds: recurrenceDayIds ?? this.recurrenceDayIds,
+      recurrenceDays: recurrenceDays ?? this.recurrenceDays,
     );
   }
 
   factory Chore.fromApiJson(Map<String, dynamic> json) {
-    final recurrenceRaw = json['recurrence_day_ids'];
-    List<int> recurrenceDayIds = const [];
-    if (recurrenceRaw is List) {
-      recurrenceDayIds = recurrenceRaw.map((e) => (e as num).toInt()).toList();
+    List<DayOfWeek> recurrenceDays = const [];
+    final rawDays = json['recurrence_days'];
+    if (rawDays is List) {
+      recurrenceDays = rawDays
+          .map((e) => DayOfWeek.fromApiJson(e as Map<String, dynamic>))
+          .toList();
     }
+
     return Chore(
       id: (json['id'] as num).toString(),
       title: json['title'] as String,
@@ -65,7 +73,7 @@ class Chore {
       createdBy: (json['created_by'] as num).toString(),
       completed: json['completed'] as bool,
       isRecurring: json['is_recurring'] as bool? ?? false,
-      recurrenceDayIds: recurrenceDayIds,
+      recurrenceDays: recurrenceDays,
     );
   }
 

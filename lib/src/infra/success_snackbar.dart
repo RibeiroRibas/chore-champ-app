@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:chore_champ_app/src/constants/app_colors.dart';
 
-/// Exibe um snackbar de sucesso genérico, reutilizável.
-/// Contém mensagem, ícone (ou emoji) e ícone de fechar.
-/// Fecha automaticamente após [duration] (padrão 3 segundos).
 void showSuccessSnackBar(
   BuildContext context, {
   required String message,

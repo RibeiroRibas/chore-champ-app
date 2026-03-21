@@ -12,12 +12,14 @@ import 'package:chore_champ_app/src/providers/members_provider.dart';
 import 'package:chore_champ_app/src/views/chores/components/assign_chore_dialog_component.dart';
 import 'package:chore_champ_app/src/views/chores/components/chore_card_component.dart';
 import 'package:chore_champ_app/src/views/chores/components/chore_form_dialog_component.dart';
+import 'package:chore_champ_app/src/views/chores/components/new_reward_unlocked_celebration_component.dart';
 import 'package:chore_champ_app/src/views/components/rounded_dropdown_component.dart';
 import 'package:chore_champ_app/src/views/components/confirm_action_dialog.dart';
 import 'package:chore_champ_app/src/views/components/empty_chores_card_component.dart';
 import 'package:chore_champ_app/src/views/components/gradient_warm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 enum ChoresTab { today, all }
 
@@ -57,6 +59,27 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
     }
   }
 
+  void _showNewRewardUnlockedCelebration() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => NewRewardUnlockedCelebrationComponent(
+        onClose: () => Navigator.of(ctx).pop(),
+        onViewRewards: () {
+          Navigator.of(ctx).pop();
+          if (mounted) context.go('/rewards');
+        },
+      ),
+    );
+  }
+
+  void _onToggleChoreFromCard(String choreId) {
+    ref.read(choresProvider.notifier).toggleComplete(choreId).then((unlocked) {
+      if (!mounted) return;
+      if (unlocked) _showNewRewardUnlockedCelebration();
+    });
+  }
+
   static String _getMemberName(String? id, List<FamilyMember> members) {
     if (id == null) return AppStrings.unassigned;
     try {
@@ -68,11 +91,9 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
 
   Future<void> _handleSaveChore(Chore chore) async {
     try {
-      if (chore.id.isNotEmpty) {
-        await ref.read(choresProvider.notifier).updateChore(chore);
-      } else {
-        await ref.read(choresProvider.notifier).addChore(chore);
-      }
+      final unlocked = chore.id.isNotEmpty
+          ? await ref.read(choresProvider.notifier).updateChore(chore)
+          : await ref.read(choresProvider.notifier).addChore(chore);
       if (!mounted) return;
       showSuccessSnackBar(
         context,
@@ -84,6 +105,7 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
         _showChoreForm = false;
         _editingChore = null;
       });
+      if (unlocked) _showNewRewardUnlockedCelebration();
     } on ApiException catch (e) {
       if (!mounted) return;
       showApiErrorSnackBar(context, e);
@@ -188,9 +210,11 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
 
   Future<void> _handleComplete(Chore chore) async {
     try {
-      await ref.read(choresProvider.notifier).completeChore(chore.id);
+      final unlocked =
+          await ref.read(choresProvider.notifier).completeChore(chore.id);
       if (!mounted) return;
       showSuccessSnackBar(context, message: AppStrings.choreCompletedSuccess);
+      if (unlocked) _showNewRewardUnlockedCelebration();
     } on ApiException catch (e) {
       if (!mounted) return;
       showApiErrorSnackBar(context, e);
@@ -534,9 +558,7 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                 currentMember,
                                 todayList,
                               )
-                                  ? () => ref
-                                        .read(choresProvider.notifier)
-                                        .toggleComplete(chore.id)
+                                  ? () => _onToggleChoreFromCard(chore.id)
                                   : null,
                               onEdit: chore.canEdit(currentMember)
                                   ? () => setState(() {
@@ -603,9 +625,7 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                   currentMember,
                                   todayList,
                                 )
-                                    ? () => ref
-                                          .read(choresProvider.notifier)
-                                          .toggleComplete(chore.id)
+                                    ? () => _onToggleChoreFromCard(chore.id)
                                     : null,
                               ),
                             ),

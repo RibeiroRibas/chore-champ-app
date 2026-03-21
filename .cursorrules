@@ -83,6 +83,7 @@ Sempre que o fluxo for **adicionar** ou **atualizar** um registro na API, use um
 - Use **`const`** construtores sempre que possível para performance.
 - Nomeação de arquivos: `snake_case.dart`.
 - Nomeação de classes: `PascalCase`.
+- **Sem comentários no código** (`//`, `/* */`, `///`): não adicionar comentários no código-fonte. Preferir **nomes claros** (variáveis, funções, métodos, getters, classes, parâmetros nomeados) que expliquem o propósito; extrair métodos ou widgets com nomes descritivos em vez de comentar o fluxo.
 - Erros e Estados Vazios: Sempre trate estados de `.loading` e `.error` ao consumir `AsyncValue`.
 - **Imports:** Use sempre o path absoluto do package. Nunca use imports relativos que começam com `../` ou `./`. Exemplo: em vez de `import '../../../constants/app_colors.dart';`, use `import 'package:chore_champ_app/src/constants/app_colors.dart';`.
 

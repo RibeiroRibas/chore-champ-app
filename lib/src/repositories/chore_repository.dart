@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:chore_champ_app/src/filters/all_chores_filters.dart';
 import 'package:chore_champ_app/src/infra/api_client.dart';
 import 'package:chore_champ_app/src/models/chore.dart';
+import 'package:chore_champ_app/src/models/chore_reward_unlock_response.dart';
 import 'package:chore_champ_app/src/models/paginated_chores_response.dart';
 
 class ChoreRepository {
@@ -58,7 +59,7 @@ class ChoreRepository {
     }
   }
 
-  Future<void> addChore(Chore chore) async {
+  Future<bool> addChore(Chore chore) async {
     try {
       final body = <String, dynamic>{
         'title': chore.title,
@@ -73,14 +74,18 @@ class ChoreRepository {
       if (chore.isRecurring && chore.recurrenceDayIds.isNotEmpty) {
         body['recurrence_day_ids'] = chore.recurrenceDayIds;
       }
-      await _client.post(_basePath, body: body);
+      final data = await _client.postWithResponse<Map<String, dynamic>>(
+        _basePath,
+        body: body,
+      );
+      return ChoreRewardUnlockResponse.fromJson(data).newRewardUnlocked;
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;
     }
   }
 
-  Future<void> updateChore(Chore chore) async {
+  Future<bool> updateChore(Chore chore) async {
     try {
       final body = <String, dynamic>{
         'title': chore.title,
@@ -97,7 +102,11 @@ class ChoreRepository {
       if (chore.isRecurring && chore.recurrenceDayIds.isNotEmpty) {
         body['recurrence_day_ids'] = chore.recurrenceDayIds;
       }
-      await _client.putNoResponse('$_basePath/${chore.id}', body: body);
+      final data = await _client.put<Map<String, dynamic>>(
+        '$_basePath/${chore.id}',
+        body: body,
+      );
+      return ChoreRewardUnlockResponse.fromJson(data).newRewardUnlocked;
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;
@@ -131,9 +140,12 @@ class ChoreRepository {
     }
   }
 
-  Future<void> completeChore(String choreId) async {
+  Future<bool> completeChore(String choreId) async {
     try {
-      await _client.patch('$_basePath/$choreId/complete');
+      final data = await _client.patchWithResponse<Map<String, dynamic>>(
+        '$_basePath/$choreId/complete',
+      );
+      return ChoreRewardUnlockResponse.fromJson(data).newRewardUnlocked;
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;

@@ -122,20 +122,20 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     }
   }
 
-  Future<void> toggleComplete(String choreId) async {
+  Future<bool> toggleComplete(String choreId) async {
     final current = state.valueOrNull;
     final list = current?.today.valueOrNull;
-    if (list == null) return;
+    if (list == null) return false;
     Chore? chore;
     try {
       chore = list.firstWhere((c) => c.id == choreId);
     } catch (_) {
-      return;
+      return false;
     }
     final newCompletedValue = !chore.completed;
 
     final repo = ref.read(choreRepositoryProvider);
-    await repo.updateChore(
+    final unlocked = await repo.updateChore(
       chore.copyWith(
         completed: newCompletedValue,
       ),
@@ -146,6 +146,7 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
       _invalidateRankingRewardsAndMember();
     }
     await _refreshTodayAndAllChoresIfLoaded(repo);
+    return unlocked;
   }
 
   Future<void> assignChore(String choreId, String memberId) async {
@@ -159,18 +160,20 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     await _refreshTodayOnly(repo);
   }
 
-  Future<void> addChore(Chore chore) async {
+  Future<bool> addChore(Chore chore) async {
     final repo = ref.read(choreRepositoryProvider);
-    await repo.addChore(chore);
+    final unlocked = await repo.addChore(chore);
     await _refreshTodayAndAllChores(repo);
     _invalidateRankingRewardsAndMember();
+    return unlocked;
   }
 
-  Future<void> updateChore(Chore chore) async {
+  Future<bool> updateChore(Chore chore) async {
     final repo = ref.read(choreRepositoryProvider);
-    await repo.updateChore(chore);
+    final unlocked = await repo.updateChore(chore);
     await _refreshTodayAndAllChoresIfLoaded(repo);
     _invalidateRankingRewardsAndMember();
+    return unlocked;
   }
 
   Future<void> assignChoreToMe(String choreId) async {
@@ -193,14 +196,15 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     _invalidateRankingRewardsAndMember();
   }
 
-  Future<void> completeChore(String choreId) async {
+  Future<bool> completeChore(String choreId) async {
     final current = state.valueOrNull;
     final list = current?.today.valueOrNull;
-    if (list == null) return;
+    if (list == null) return false;
     final repo = ref.read(choreRepositoryProvider);
-    await repo.completeChore(choreId);
+    final unlocked = await repo.completeChore(choreId);
     await _refreshTodayAndAllChoresIfLoaded(repo);
     _invalidateRankingRewardsAndMember();
+    return unlocked;
   }
 
   Future<void> deleteChore(String choreId) async {

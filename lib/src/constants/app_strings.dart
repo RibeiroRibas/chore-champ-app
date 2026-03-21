@@ -157,6 +157,10 @@ class AppStrings {
   static const String rewardCelebrationTitle = 'Recompensa resgatada!';
   static const String rewardCelebrationMessage =
       'Boa! Voce celebrou mais uma conquista. Continue assim! 🎉';
+  static const String newRewardUnlockedTitle = 'Nova recompensa desbloqueada!';
+  static const String newRewardUnlockedMessage =
+      'Você ganhou pontos suficientes para desbloquear uma recompensa. Confira a sua recompensa.';
+  static const String viewRewardsButton = 'Ver recompensas';
 
   // Family
   static const String familyMembers = 'Membros da família';

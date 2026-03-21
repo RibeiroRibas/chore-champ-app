@@ -113,36 +113,27 @@ class ChoreRepository {
     }
   }
 
-  Future<Chore> assignChoreToMe(String choreId) async {
+  Future<void> assignChoreToMe(String choreId) async {
     try {
-      final data = await _client.patchWithResponse<Map<String, dynamic>>(
-        '$_basePath/$choreId/assign-to-me',
-      );
-      return Chore.fromApiJson(data);
+      await _client.patch('$_basePath/$choreId/assign-to-me');
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;
     }
   }
 
-  Future<Chore> removeAssignChoreToMe(String choreId) async {
+  Future<void> removeAssignChoreToMe(String choreId) async {
     try {
-      final data = await _client.patchWithResponse<Map<String, dynamic>>(
-        '$_basePath/$choreId/remove-assign-to-me',
-      );
-      return Chore.fromApiJson(data);
+      await _client.patch('$_basePath/$choreId/remove-assign-to-me');
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;
     }
   }
 
-  Future<Chore> completeChore(String choreId) async {
+  Future<void> completeChore(String choreId) async {
     try {
-      final data = await _client.patchWithResponse<Map<String, dynamic>>(
-        '$_basePath/$choreId/complete',
-      );
-      return Chore.fromApiJson(data);
+      await _client.patch('$_basePath/$choreId/complete');
     } on DioException catch (e) {
       if (e.response != null) _client.throwFromResponse(e.response!);
       rethrow;

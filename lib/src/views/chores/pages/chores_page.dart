@@ -529,9 +529,15 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                 members,
                               ),
                               completed: false,
-                              onToggle: () => ref
-                                  .read(choresProvider.notifier)
-                                  .toggleComplete(chore.id),
+                              onToggle: _canToggleChoreCheckbox(
+                                chore,
+                                currentMember,
+                                todayList,
+                              )
+                                  ? () => ref
+                                        .read(choresProvider.notifier)
+                                        .toggleComplete(chore.id)
+                                  : null,
                               onEdit: chore.canEdit(currentMember)
                                   ? () => setState(() {
                                       _editingChore = chore;
@@ -550,7 +556,10 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                       () => _choreToRemoveAssignment = chore,
                                     )
                                   : null,
-                              onComplete: chore.canComplete(currentMember)
+                              onComplete: chore.canComplete(
+                                currentMember,
+                                todayChores: todayList,
+                              )
                                   ? () =>
                                         setState(() => _choreToComplete = chore)
                                   : null,
@@ -566,7 +575,10 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                               showRemoveAssignment: chore.canRemoveAssignment(
                                 currentMember,
                               ),
-                              showComplete: chore.canComplete(currentMember),
+                              showComplete: chore.canComplete(
+                                currentMember,
+                                todayChores: todayList,
+                              ),
                               showDelete: chore.canDelete(currentMember),
                             ),
                           ),
@@ -586,9 +598,15 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                   members,
                                 ),
                                 completed: true,
-                                onToggle: () => ref
-                                    .read(choresProvider.notifier)
-                                    .toggleComplete(chore.id),
+                                onToggle: _canToggleChoreCheckbox(
+                                  chore,
+                                  currentMember,
+                                  todayList,
+                                )
+                                    ? () => ref
+                                          .read(choresProvider.notifier)
+                                          .toggleComplete(chore.id)
+                                    : null,
                               ),
                             ),
                           ],
@@ -681,6 +699,18 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text(AppStrings.errorGeneric)),
     );
+  }
+
+  bool _canToggleChoreCheckbox(
+    Chore chore,
+    FamilyMember member,
+    List<Chore> todayApiList,
+  ) {
+    final inToday = todayApiList.any((c) => c.id == chore.id);
+    if (!chore.completed) {
+      return chore.canComplete(member, todayChores: todayApiList);
+    }
+    return inToday && (member.isAdmin() || chore.createdBy == member.id);
   }
 
   List<Chore> _getTodayFilteredChores(

@@ -58,7 +58,9 @@ class _ChoreFormDialogComponentState
       _title = '';
       _emoji = '🧹';
       _points = 10;
-      _assignedToUserId = null;
+      _assignedToUserId = widget.currentMember.isAdmin()
+          ? null
+          : widget.currentMember.id;
       _completed = false;
       _isRecurring = false;
       _selectedDayIds = [];
@@ -70,6 +72,15 @@ class _ChoreFormDialogComponentState
       _points >= 1 &&
       _emoji.trim().isNotEmpty &&
       (!_isRecurring || _selectedDayIds.isNotEmpty);
+
+  String _memberFirstName(List<FamilyMember> members, String? userId) {
+    if (userId == null) return AppStrings.unassigned;
+    try {
+      return members.firstWhere((m) => m.id == userId).getFirstName();
+    } catch (_) {
+      return AppStrings.unknownMember;
+    }
+  }
 
   void _toggleDay(int dayId) {
     setState(() {
@@ -187,47 +198,83 @@ class _ChoreFormDialogComponentState
                     style: Theme.of(context).textTheme.labelMedium,
                   ),
                   const SizedBox(height: 8),
-                  ref
-                      .watch(membersProvider)
-                      .when(
-                        data: (members) => SizedBox(
-                          height: 50,
-                          child: RoundedDropdownComponent<String?>(
-                            value: _assignedToUserId,
-                            labelText: null,
-                            hint: AppStrings.unassigned,
-                            items: [
-                              const DropdownMenuItem<String?>(
-                                value: null,
-                                child: Text(AppStrings.unassigned),
+                  ref.watch(membersProvider).when(
+                    data: (members) =>
+                        widget.currentMember.isAdmin()
+                        ? SizedBox(
+                            height: 50,
+                            child: RoundedDropdownComponent<String?>(
+                              value: _assignedToUserId,
+                              labelText: null,
+                              hint: AppStrings.unassigned,
+                              items: [
+                                const DropdownMenuItem<String?>(
+                                  value: null,
+                                  child: Text(AppStrings.unassigned),
+                                ),
+                                ...members.map(
+                                  (m) => DropdownMenuItem<String?>(
+                                    value: m.id,
+                                    child: Text(m.getFirstName()),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (value) =>
+                                  setState(() => _assignedToUserId = value),
+                            ),
+                          )
+                        : _isEdit
+                        ? InputDecorator(
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
                               ),
-                              ...members.map(
-                                (m) => DropdownMenuItem<String?>(
-                                  value: m.id,
-                                  child: Text(m.getFirstName()),
+                            ),
+                            child: Text(
+                              _memberFirstName(
+                                members,
+                                widget.chore!.assignedTo,
+                              ),
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              InputDecorator(
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                child: Text(
+                                  widget.currentMember.getFirstName(),
+                                  style: Theme.of(context).textTheme.bodyLarge,
                                 ),
                               ),
                             ],
-                            onChanged: (value) =>
-                                setState(() => _assignedToUserId = value),
                           ),
-                        ),
-                        loading: () => const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                        error: (_, _) => Text(
-                          AppStrings.errorGeneric,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                        ),
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       ),
+                    ),
+                    error: (_, _) => Text(
+                      AppStrings.errorGeneric,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   CheckboxListTile(
                     value: _isRecurring,

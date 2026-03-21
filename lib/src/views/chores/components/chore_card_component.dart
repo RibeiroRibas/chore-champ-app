@@ -9,7 +9,7 @@ class ChoreCardComponent extends StatelessWidget {
     required this.chore,
     required this.assignedToName,
     required this.completed,
-    required this.onToggle,
+    this.onToggle,
     this.onEdit,
     this.onAssignToMe,
     this.onRemoveAssignment,
@@ -25,7 +25,7 @@ class ChoreCardComponent extends StatelessWidget {
   final Chore chore;
   final String assignedToName;
   final bool completed;
-  final VoidCallback onToggle;
+  final VoidCallback? onToggle;
   final VoidCallback? onEdit;
   final VoidCallback? onAssignToMe;
   final VoidCallback? onRemoveAssignment;

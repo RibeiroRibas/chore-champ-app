@@ -83,10 +83,15 @@ class Chore {
   bool canRemoveAssignment(FamilyMember currentUser) =>
       !completed &&
       assignedTo != null &&
-      (currentUser.role == Role.admin || assignedTo == currentUser.id);
+      currentUser.role == Role.admin;
 
-  bool canComplete(FamilyMember currentUser) =>
-      !completed &&
-      assignedTo != null &&
-      (currentUser.role == Role.admin || assignedTo == currentUser.id);
+  bool canComplete(
+    FamilyMember currentUser, {
+    required List<Chore> todayChores,
+  }) {
+    if (completed || assignedTo == null) return false;
+    if (currentUser.role == Role.admin) return true;
+    if (assignedTo != currentUser.id) return false;
+    return todayChores.any((c) => c.id == id);
+  }
 }

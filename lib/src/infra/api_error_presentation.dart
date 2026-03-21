@@ -32,6 +32,13 @@ const Map<int, String> _apiErrorCodeMessages = <int, String>{
   400303: 'O telefone informado não está no formato adequado',
   400304: 'Você não pode editar ou excluir uma tarefa depois de concluída',
   400305: 'Deve haver ao menos um administrador por família',
+  400308: 'Não há responsável atribuído a esta tarefa.',
+  400313:
+      'Somente administradores da família podem remover a atribuição da tarefa.',
+  400314:
+      'Colaboradores só podem concluir tarefas que aparecem na lista do dia atual.',
+  400315:
+      'Colaboradores só podem criar tarefas atribuídas a si mesmos.',
 
   // Not Found (404xxx)
   404300: 'Código de verificação não encontrado.',

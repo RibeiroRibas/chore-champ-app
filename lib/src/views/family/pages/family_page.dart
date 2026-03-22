@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/infra/api_error_presentation.dart';
+import 'package:chore_champ_app/src/infra/success_snackbar.dart';
+import 'package:chore_champ_app/src/views/components/info_alert_dialog.dart';
 import 'package:chore_champ_app/src/models/family_member.dart';
 import 'package:chore_champ_app/src/models/ranking_member.dart';
 import 'package:chore_champ_app/src/providers/achievements_provider.dart';
@@ -48,6 +50,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
 
   Future<void> _handleSave(FamilyMember member) async {
     try {
+      final isCreate = !member.isIdPresent();
       if (member.isIdPresent()) {
         await ref.read(membersProvider.notifier).updateMember(member);
       } else {
@@ -55,6 +58,14 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
       }
       if (!mounted) return;
       setState(() => _dialogOpen = false);
+      if (isCreate) {
+        await showInfoAlertDialog(
+          context,
+          title: AppStrings.memberCreatedPasswordEmailDialogTitle,
+          message: AppStrings.memberCreatedPasswordEmailInfo,
+          icon: Icons.mark_email_read_outlined,
+        );
+      }
     } on ApiException catch (e) {
       if (!mounted) return;
       showApiErrorSnackBar(context, e);
@@ -70,8 +81,14 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
     try {
       await ref.read(membersProvider.notifier).resendPassword(member!.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.resendPasswordSent)),
+      showSuccessSnackBar(
+        context,
+        message: AppStrings.resendPasswordSent,
+        icon: Icon(
+          Icons.mark_email_read_outlined,
+          color: AppColors.primary,
+          size: 22,
+        ),
       );
     } on ApiException catch (e) {
       if (!mounted) return;

@@ -180,6 +180,11 @@ class AppStrings {
   static const String nameHint = 'Ex.: Maria';
   static const String resendPassword = 'Reenviar senha';
   static const String resendPasswordSent = 'Nova senha enviada por e-mail.';
+  static const String memberCreatedPasswordEmailInfo =
+      'A senha do novo membro foi enviada por e-mail. Se não recebeu, abra a edição do membro e toque em «Reenviar senha».';
+  static const String memberCreatedPasswordEmailDialogTitle =
+      'Membro criado com sucesso';
+  static const String dialogGotIt = 'Entendi';
   static const String emailHint = 'email@exemplo.com';
   static const String emailExample = 'voce@exemplo.com';
   static const String avatar = 'Avatar';

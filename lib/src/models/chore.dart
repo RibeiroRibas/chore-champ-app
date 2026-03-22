@@ -13,6 +13,7 @@ class Chore {
     required this.completed,
     this.isRecurring = false,
     this.recurrenceDays = const [],
+    this.assignedToUserIds,
   });
 
   final String id;
@@ -21,6 +22,8 @@ class Chore {
   final int points;
   final String? assignedTo;
   final String createdBy;
+
+  final List<String>? assignedToUserIds;
   final bool completed;
   final bool isRecurring;
 
@@ -39,6 +42,7 @@ class Chore {
     bool? completed,
     bool? isRecurring,
     List<DayOfWeek>? recurrenceDays,
+    List<String>? assignedToUserIds,
   }) {
     return Chore(
       id: id ?? this.id,
@@ -50,6 +54,7 @@ class Chore {
       completed: completed ?? this.completed,
       isRecurring: isRecurring ?? this.isRecurring,
       recurrenceDays: recurrenceDays ?? this.recurrenceDays,
+      assignedToUserIds: assignedToUserIds ?? this.assignedToUserIds,
     );
   }
 

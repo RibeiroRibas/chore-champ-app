@@ -68,8 +68,13 @@ class ChoreRepository {
         'completed': chore.completed,
         'is_recurring': chore.isRecurring,
       };
-      if (chore.assignedTo != null && chore.assignedTo!.isNotEmpty) {
-        body['assigned_to_user_id'] = int.tryParse(chore.assignedTo!);
+      final ids = chore.assignedToUserIds;
+      if (ids != null) {
+        body['assigned_to_user_ids'] = ids.map((e) => int.parse(e)).toList();
+      } else if (chore.assignedTo != null && chore.assignedTo!.isNotEmpty) {
+        body['assigned_to_user_ids'] = [int.parse(chore.assignedTo!)];
+      } else {
+        body['assigned_to_user_ids'] = <int>[];
       }
       if (chore.isRecurring && chore.recurrenceDayIds.isNotEmpty) {
         body['recurrence_day_ids'] = chore.recurrenceDayIds;

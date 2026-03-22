@@ -95,11 +95,19 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
           ? await ref.read(choresProvider.notifier).updateChore(chore)
           : await ref.read(choresProvider.notifier).addChore(chore);
       if (!mounted) return;
+      final String successMessage;
+      if (chore.id.isNotEmpty) {
+        successMessage = AppStrings.choreUpdated;
+      } else {
+        final ids = chore.assignedToUserIds;
+        final n = (ids == null || ids.isEmpty) ? 1 : ids.length;
+        successMessage = n > 1
+            ? AppStrings.choresCreatedMultiple
+            : AppStrings.choreCreated;
+      }
       showSuccessSnackBar(
         context,
-        message: chore.id.isNotEmpty
-            ? AppStrings.choreUpdated
-            : AppStrings.choreCreated,
+        message: successMessage,
       );
       setState(() {
         _showChoreForm = false;

@@ -112,6 +112,9 @@ class AppStrings {
   static const String filterToday = 'Hoje';
   static const String filtersTitle = 'Filtros';
   static const String assigneeLabel = 'Responsável';
+  static const String assigneeLabelMulti =
+      'Responsável (selecione um ou mais membros)';
+  static const String choresCreatedMultiple = 'Tarefas criadas.';
   static const String selectHint = 'Selecione';
   static const String allAssignees = 'Todos';
   static const String filterRecurring = 'Recorrente';

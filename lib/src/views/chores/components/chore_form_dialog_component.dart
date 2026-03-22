@@ -37,6 +37,7 @@ class _ChoreFormDialogComponentState
   late String _emoji;
   late int _points;
   String? _assignedToUserId;
+  late Set<String> _assignedToUserIds;
   late bool _completed;
   late bool _isRecurring;
   late List<int> _selectedDayIds;
@@ -51,6 +52,7 @@ class _ChoreFormDialogComponentState
       _emoji = widget.chore!.emoji;
       _points = widget.chore!.points;
       _assignedToUserId = widget.chore!.assignedTo;
+      _assignedToUserIds = {};
       _completed = widget.chore!.completed;
       _isRecurring = widget.chore!.isRecurring;
       _selectedDayIds = List<int>.from(widget.chore!.recurrenceDayIds);
@@ -58,12 +60,16 @@ class _ChoreFormDialogComponentState
       _title = '';
       _emoji = '🧹';
       _points = 10;
-      _assignedToUserId = widget.currentMember.isAdmin()
-          ? null
-          : widget.currentMember.id;
       _completed = false;
       _isRecurring = false;
       _selectedDayIds = [];
+      if (widget.currentMember.isAdmin()) {
+        _assignedToUserId = null;
+        _assignedToUserIds = {};
+      } else {
+        _assignedToUserId = widget.currentMember.id;
+        _assignedToUserIds = {widget.currentMember.id};
+      }
     }
   }
 
@@ -194,35 +200,77 @@ class _ChoreFormDialogComponentState
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    AppStrings.assigneeLabel,
+                    _isEdit
+                        ? AppStrings.assigneeLabel
+                        : (widget.currentMember.isAdmin()
+                              ? AppStrings.assigneeLabelMulti
+                              : AppStrings.assigneeLabel),
                     style: Theme.of(context).textTheme.labelMedium,
                   ),
                   const SizedBox(height: 8),
                   ref.watch(membersProvider).when(
                     data: (members) =>
                         widget.currentMember.isAdmin()
-                        ? SizedBox(
-                            height: 50,
-                            child: RoundedDropdownComponent<String?>(
-                              value: _assignedToUserId,
-                              labelText: null,
-                              hint: AppStrings.unassigned,
-                              items: [
-                                const DropdownMenuItem<String?>(
-                                  value: null,
-                                  child: Text(AppStrings.unassigned),
-                                ),
-                                ...members.map(
-                                  (m) => DropdownMenuItem<String?>(
-                                    value: m.id,
-                                    child: Text(m.getFirstName()),
+                        ? _isEdit
+                              ? SizedBox(
+                                  height: 50,
+                                  child: RoundedDropdownComponent<String?>(
+                                    value: _assignedToUserId,
+                                    labelText: null,
+                                    hint: AppStrings.unassigned,
+                                    items: [
+                                      const DropdownMenuItem<String?>(
+                                        value: null,
+                                        child: Text(AppStrings.unassigned),
+                                      ),
+                                      ...members.map(
+                                        (m) => DropdownMenuItem<String?>(
+                                          value: m.id,
+                                          child: Text(m.getFirstName()),
+                                        ),
+                                      ),
+                                    ],
+                                    onChanged: (value) => setState(
+                                      () => _assignedToUserId = value,
+                                    ),
                                   ),
-                                ),
-                              ],
-                              onChanged: (value) =>
-                                  setState(() => _assignedToUserId = value),
-                            ),
-                          )
+                                )
+                              : Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    FilterChip(
+                                      label: Text(AppStrings.unassigned),
+                                      selected: _assignedToUserIds.isEmpty,
+                                      onSelected: (_) => setState(
+                                        () => _assignedToUserIds.clear(),
+                                      ),
+                                      selectedColor: AppColors.primary
+                                          .withValues(alpha: 0.15),
+                                      checkmarkColor: AppColors.primary,
+                                    ),
+                                    ...members.map((m) {
+                                      final selected = _assignedToUserIds
+                                          .contains(m.id);
+                                      return FilterChip(
+                                        label: Text(m.getFirstName()),
+                                        selected: selected,
+                                        onSelected: (value) {
+                                          setState(() {
+                                            if (value) {
+                                              _assignedToUserIds.add(m.id);
+                                            } else {
+                                              _assignedToUserIds.remove(m.id);
+                                            }
+                                          });
+                                        },
+                                        selectedColor: AppColors.primary
+                                            .withValues(alpha: 0.15),
+                                        checkmarkColor: AppColors.primary,
+                                      );
+                                    }),
+                                  ],
+                                )
                         : _isEdit
                         ? InputDecorator(
                             decoration: const InputDecoration(
@@ -391,12 +439,14 @@ class _ChoreFormDialogComponentState
         recurrenceDays: recurrenceDays,
       );
     }
+    final ids = _assignedToUserIds.toList()..sort();
     return Chore(
       id: '',
       title: _title.trim(),
       emoji: _emoji.trim().isEmpty ? '🧹' : _emoji.trim(),
       points: _points,
-      assignedTo: _assignedToUserId,
+      assignedTo: ids.length == 1 ? ids.first : null,
+      assignedToUserIds: ids,
       createdBy: widget.currentMember.id,
       completed: _completed,
       isRecurring: _isRecurring,

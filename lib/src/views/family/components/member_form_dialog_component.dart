@@ -183,7 +183,7 @@ class _MemberFormDialogComponentState extends State<MemberFormDialogComponent> {
                         .map(
                           (r) => DropdownMenuItem<Role>(
                             value: r,
-                            child: Text(r.name),
+                            child: Text(r.labelPortuguese),
                           ),
                         )
                         .toList(),

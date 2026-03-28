@@ -8,12 +8,14 @@ class EmptyChoresCardComponent extends StatelessWidget {
     super.key,
     this.title = AppStrings.allCaughtUp,
     this.subtitle,
+    this.showActionButton = true,
     this.actionLabel,
     this.onActionPressed,
   });
 
   final String title;
   final String? subtitle;
+  final bool showActionButton;
   final String? actionLabel;
   final VoidCallback? onActionPressed;
 
@@ -79,7 +81,9 @@ class EmptyChoresCardComponent extends StatelessWidget {
                 _HintChip(icon: Icons.task_alt_rounded, label: 'Dia produtivo'),
               ],
             ),
-            if (actionLabel != null && onActionPressed != null) ...[
+            if (showActionButton &&
+                actionLabel != null &&
+                onActionPressed != null) ...[
               const SizedBox(height: 14),
               FilledButton.icon(
                 onPressed: onActionPressed,

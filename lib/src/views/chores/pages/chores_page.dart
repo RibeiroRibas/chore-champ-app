@@ -1,5 +1,6 @@
 import 'package:chore_champ_app/src/constants/app_colors.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
+import 'package:chore_champ_app/src/infra/page_pull_refresh.dart';
 import 'package:chore_champ_app/src/infra/api_error_presentation.dart';
 import 'package:chore_champ_app/src/infra/api_exception.dart';
 import 'package:chore_champ_app/src/infra/success_snackbar.dart';
@@ -9,6 +10,7 @@ import 'package:chore_champ_app/src/filters/all_chores_filters_provider.dart';
 import 'package:chore_champ_app/src/providers/chores_provider.dart';
 import 'package:chore_champ_app/src/providers/current_member_provider.dart';
 import 'package:chore_champ_app/src/providers/members_provider.dart';
+import 'package:chore_champ_app/src/providers/today_chores_assignee_filter_provider.dart';
 import 'package:chore_champ_app/src/views/chores/components/assign_chore_dialog_component.dart';
 import 'package:chore_champ_app/src/views/chores/components/chore_card_component.dart';
 import 'package:chore_champ_app/src/views/chores/components/chore_form_dialog_component.dart';
@@ -23,7 +25,14 @@ import 'package:go_router/go_router.dart';
 
 enum ChoresTab { today, all }
 
-enum TodayFilter { mine, all }
+String? _prefillAssigneeIdWhenOpeningCreateFromTodayEmptyCard({
+  required FamilyMember currentMember,
+  required TodayChoresAssigneeListFilter todayFilter,
+}) {
+  if (!currentMember.isAdmin()) return null;
+  if (todayFilter.isMine) return currentMember.id;
+  return todayFilter.memberUserIdIfSelected;
+}
 
 class ChoresPage extends ConsumerStatefulWidget {
   const ChoresPage({super.key});
@@ -35,8 +44,8 @@ class ChoresPage extends ConsumerStatefulWidget {
 class _ChoresPageState extends ConsumerState<ChoresPage> {
   final _choreFormKey = GlobalKey<FormState>();
   ChoresTab _tab = ChoresTab.today;
-  TodayFilter _todayFilter = TodayFilter.mine;
   bool _showChoreForm = false;
+  String? _prefillAssigneeUserIdOnCreate;
   Chore? _editingChore;
   String? _deleteChoreId;
   Chore? _choreToRemoveAssignment;
@@ -112,6 +121,7 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
       setState(() {
         _showChoreForm = false;
         _editingChore = null;
+        _prefillAssigneeUserIdOnCreate = null;
       });
       if (unlocked) _showNewRewardUnlockedCelebration();
     } on ApiException catch (e) {
@@ -284,29 +294,30 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
         return choresAsync.when(
           data: (choresState) {
             final membersAsync = ref.watch(membersProvider);
-            final todayList = choresState.today.valueOrNull ?? <Chore>[];
-            final todayChores = _getTodayFilteredChores(
-              todayList,
-              currentMember,
-            );
+            final todayListForDueCheck =
+                choresState.today.valueOrNull ?? <Chore>[];
             final allChores =
                 choresState.allPaginated.valueOrNull?.items ?? <Chore>[];
-            final sourceChores = _tab == ChoresTab.today
-                ? todayChores
-                : allChores;
-            final pending = sourceChores.where((c) => !c.completed).toList();
-            final completed = sourceChores.where((c) => c.completed).toList();
+            final pendingAll =
+                allChores.where((c) => !c.completed).toList();
+            final completedAll =
+                allChores.where((c) => c.completed).toList();
             return membersAsync.when(
               data: (members) {
+                final todayAssigneeFilter =
+                    ref.watch(todayChoresAssigneeFilterProvider);
                 return Stack(
                   children: [
-                    SingleChildScrollView(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 20,
-                      ),
-                      child: Column(
+                    RefreshIndicator(
+                      onRefresh: () => pullRefreshChoresTab(ref),
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
@@ -321,6 +332,7 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                 child: InkWell(
                                   onTap: () => setState(() {
                                     _editingChore = null;
+                                    _prefillAssigneeUserIdOnCreate = null;
                                     _showChoreForm = true;
                                   }),
                                   borderRadius: BorderRadius.circular(24),
@@ -377,17 +389,18 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           if (_tab == ChoresTab.today) ...[
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
                               children: [
                                 ChoiceChip(
                                   label: const Text(AppStrings.filterMine),
-                                  selected: _todayFilter == TodayFilter.mine,
+                                  selected: todayAssigneeFilter.isMine,
                                   selectedColor: AppColors.primary,
                                   labelStyle: TextStyle(
-                                    color: _todayFilter == TodayFilter.mine
+                                    color: todayAssigneeFilter.isMine
                                         ? AppColors.primaryForeground
                                         : AppColors.mutedForeground,
                                     fontSize: 11,
@@ -400,18 +413,23 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                   materialTapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                   onSelected: (_) {
-                                    setState(
-                                      () => _todayFilter = TodayFilter.mine,
-                                    );
+                                    ref
+                                        .read(
+                                          todayChoresAssigneeFilterProvider
+                                              .notifier,
+                                        )
+                                        .setMine();
+                                    ref
+                                        .read(choresProvider.notifier)
+                                        .reloadTodayAssigneeFilter();
                                   },
                                 ),
-                                const SizedBox(width: 16),
                                 ChoiceChip(
                                   label: const Text(AppStrings.filterAll),
-                                  selected: _todayFilter == TodayFilter.all,
+                                  selected: todayAssigneeFilter.isAll,
                                   selectedColor: AppColors.primary,
                                   labelStyle: TextStyle(
-                                    color: _todayFilter == TodayFilter.all
+                                    color: todayAssigneeFilter.isAll
                                         ? AppColors.primaryForeground
                                         : AppColors.mutedForeground,
                                     fontSize: 11,
@@ -424,11 +442,54 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                   materialTapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                   onSelected: (_) {
-                                    setState(
-                                      () => _todayFilter = TodayFilter.all,
-                                    );
+                                    ref
+                                        .read(
+                                          todayChoresAssigneeFilterProvider
+                                              .notifier,
+                                        )
+                                        .setAll();
+                                    ref
+                                        .read(choresProvider.notifier)
+                                        .reloadTodayAssigneeFilter();
                                   },
                                 ),
+                                ...members
+                                    .where((m) => m.id != currentMember.id)
+                                    .map(
+                                      (m) => ChoiceChip(
+                                        label: Text(m.getFirstName()),
+                                        selected: todayAssigneeFilter.isMember(
+                                          m.id,
+                                        ),
+                                        selectedColor: AppColors.primary,
+                                        labelStyle: TextStyle(
+                                          color: todayAssigneeFilter.isMember(
+                                                m.id,
+                                              )
+                                              ? AppColors.primaryForeground
+                                              : AppColors.mutedForeground,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        visualDensity: const VisualDensity(
+                                          horizontal: -2,
+                                          vertical: -2,
+                                        ),
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        onSelected: (_) {
+                                          ref
+                                              .read(
+                                                todayChoresAssigneeFilterProvider
+                                                    .notifier,
+                                              )
+                                              .setMember(m.id);
+                                          ref
+                                              .read(choresProvider.notifier)
+                                              .reloadTodayAssigneeFilter();
+                                        },
+                                      ),
+                                    ),
                               ],
                             ),
                           ] else ...[
@@ -468,7 +529,7 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                                                   .assignedToUserId,
                                               labelText:
                                                   AppStrings.assigneeLabel,
-                                              hint: AppStrings.selectHint,
+                                              hint: null,
                                               items: [
                                                 const DropdownMenuItem<String?>(
                                                   value: null,
@@ -508,32 +569,84 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Row(
+                            Wrap(
+                              spacing: 16,
+                              runSpacing: 4,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                Checkbox(
-                                  value: allChoresFilters.isRecurring,
-                                  onChanged: (v) {
-                                    ref
-                                        .read(allChoresFiltersProvider.notifier)
-                                        .setRecurring(v ?? false);
-                                    _loadAllChoresWithCurrentFilters();
-                                  },
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Checkbox(
+                                      value: allChoresFilters.showAllChores,
+                                      onChanged: (v) {
+                                        if (v == true) {
+                                          ref
+                                              .read(
+                                                allChoresFiltersProvider
+                                                    .notifier,
+                                              )
+                                              .clearRecurringAndCompletedFilters();
+                                          _loadAllChoresWithCurrentFilters();
+                                        }
+                                      },
+                                    ),
+                                    Text(
+                                      AppStrings.filterAll,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ],
                                 ),
-                                const Text(AppStrings.filterRecurring),
-                                const SizedBox(width: 16),
-                                Checkbox(
-                                  value: allChoresFilters.completed,
-                                  onChanged: (v) {
-                                    ref
-                                        .read(allChoresFiltersProvider.notifier)
-                                        .setCompleted(v ?? false);
-                                    _loadAllChoresWithCurrentFilters();
-                                  },
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Checkbox(
+                                      value: allChoresFilters.isRecurring,
+                                      onChanged: (v) {
+                                        ref
+                                            .read(
+                                              allChoresFiltersProvider
+                                                  .notifier,
+                                            )
+                                            .setRecurring(v ?? false);
+                                        _loadAllChoresWithCurrentFilters();
+                                      },
+                                    ),
+                                    Text(
+                                      AppStrings.filterRecurring,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ],
                                 ),
-                                const Text(AppStrings.filterCompleted),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Checkbox(
+                                      value: allChoresFilters.completed,
+                                      onChanged: (v) {
+                                        ref
+                                            .read(
+                                              allChoresFiltersProvider
+                                                  .notifier,
+                                            )
+                                            .setCompleted(v ?? false);
+                                        _loadAllChoresWithCurrentFilters();
+                                      },
+                                    ),
+                                    Text(
+                                      AppStrings.filterCompleted,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
-                            const SizedBox(height: 16),
                             choresState.allPaginated.when(
                               data: (_) => const SizedBox.shrink(),
                               loading: () => const Center(
@@ -544,99 +657,259 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                             ),
                           ],
                           const SizedBox(height: 16),
-                          if (_tab == ChoresTab.today && sourceChores.isEmpty) ...[
-                            EmptyChoresCardComponent(
-                              actionLabel: AppStrings.addChore,
-                              onActionPressed: () => setState(() {
-                                _editingChore = null;
-                                _showChoreForm = true;
-                              }),
-                            ),
-                          ],
-                          ...pending.map(
-                            (chore) => ChoreCardComponent(
-                              chore: chore,
-                              assignedToName: _getMemberName(
-                                chore.assignedTo,
-                                members,
+                          if (_tab == ChoresTab.today)
+                            choresState.today.when(
+                              loading: () => const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 24),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
                               ),
-                              completed: false,
-                              onToggle: _canToggleChoreCheckbox(
-                                chore,
-                                currentMember,
-                                todayList,
-                              )
-                                  ? () => _onToggleChoreFromCard(chore.id)
-                                  : null,
-                              onEdit: chore.canEdit(currentMember)
-                                  ? () => setState(() {
-                                      _editingChore = chore;
-                                      _showChoreForm = true;
-                                    })
-                                  : null,
-                              onAssignToMe: chore.canAssignToMe(currentMember)
-                                  ? () => _onAssignIconPressed(
-                                      chore,
-                                      currentMember,
-                                    )
-                                  : null,
-                              onRemoveAssignment:
-                                  chore.canRemoveAssignment(currentMember)
-                                  ? () => setState(
-                                      () => _choreToRemoveAssignment = chore,
-                                    )
-                                  : null,
-                              onComplete: chore.canComplete(
-                                currentMember,
-                                todayChores: todayList,
-                              )
-                                  ? () =>
-                                        setState(() => _choreToComplete = chore)
-                                  : null,
-                              onDelete: chore.canDelete(currentMember)
-                                  ? () => setState(
-                                      () => _deleteChoreId = chore.id,
-                                    )
-                                  : null,
-                              showEdit: chore.canEdit(currentMember),
-                              showAssignToMe: chore.canAssignToMe(
-                                currentMember,
+                              error: (_, _) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 24),
+                                child: Center(
+                                  child: Text(AppStrings.errorGeneric),
+                                ),
                               ),
-                              showRemoveAssignment: chore.canRemoveAssignment(
-                                currentMember,
-                              ),
-                              showComplete: chore.canComplete(
-                                currentMember,
-                                todayChores: todayList,
-                              ),
-                              showDelete: chore.canDelete(currentMember),
-                            ),
-                          ),
-                          if (completed.isNotEmpty) ...[
-                            const SizedBox(height: 16),
-                            Text(
-                              AppStrings.completed,
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(color: AppColors.mutedForeground),
-                            ),
-                            const SizedBox(height: 8),
-                            ...completed.map(
+                              data: (todayList) {
+                                final pendingToday = todayList
+                                    .where((c) => !c.completed)
+                                    .toList();
+                                final completedToday = todayList
+                                    .where((c) => c.completed)
+                                    .toList();
+                                final showEmptyTodayAddButton =
+                                    currentMember.isAdmin() ||
+                                    todayAssigneeFilter.isMine;
+                                return Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (pendingToday.isEmpty)
+                                      EmptyChoresCardComponent(
+                                        showActionButton:
+                                            showEmptyTodayAddButton,
+                                        actionLabel: showEmptyTodayAddButton
+                                            ? AppStrings.addChore
+                                            : null,
+                                        onActionPressed:
+                                            showEmptyTodayAddButton
+                                            ? () => setState(() {
+                                                _editingChore = null;
+                                                _prefillAssigneeUserIdOnCreate =
+                                                    _prefillAssigneeIdWhenOpeningCreateFromTodayEmptyCard(
+                                                  currentMember:
+                                                      currentMember,
+                                                  todayFilter:
+                                                      todayAssigneeFilter,
+                                                );
+                                                _showChoreForm = true;
+                                              })
+                                            : null,
+                                      ),
+                                    ...pendingToday.map(
+                                      (chore) => ChoreCardComponent(
+                                        chore: chore,
+                                        assignedToName: _getMemberName(
+                                          chore.assignedTo,
+                                          members,
+                                        ),
+                                        completed: false,
+                                        isDueToday: _isChoreDueToday(
+                                          chore,
+                                          todayList,
+                                        ),
+                                        onToggle: _canToggleChoreCheckbox(
+                                          chore,
+                                          currentMember,
+                                          todayList,
+                                        )
+                                            ? () => _onToggleChoreFromCard(
+                                                chore.id,
+                                              )
+                                            : null,
+                                        onEdit: chore.canEdit(currentMember)
+                                            ? () => setState(() {
+                                                _editingChore = chore;
+                                                _prefillAssigneeUserIdOnCreate =
+                                                    null;
+                                                _showChoreForm = true;
+                                              })
+                                            : null,
+                                        onAssignToMe:
+                                            chore.canAssignToMe(currentMember)
+                                            ? () => _onAssignIconPressed(
+                                                chore,
+                                                currentMember,
+                                              )
+                                            : null,
+                                        onRemoveAssignment: chore
+                                                .canRemoveAssignment(
+                                                  currentMember,
+                                                )
+                                            ? () => setState(
+                                                () => _choreToRemoveAssignment =
+                                                    chore,
+                                              )
+                                            : null,
+                                        onComplete: chore.canComplete(
+                                          currentMember,
+                                          todayChores: todayList,
+                                        )
+                                            ? () => setState(
+                                                () => _choreToComplete = chore,
+                                              )
+                                            : null,
+                                        onDelete: chore.canDelete(
+                                          currentMember,
+                                        )
+                                            ? () => setState(
+                                                () => _deleteChoreId =
+                                                    chore.id,
+                                              )
+                                            : null,
+                                        showEdit: chore.canEdit(
+                                          currentMember,
+                                        ),
+                                        showAssignToMe: chore.canAssignToMe(
+                                          currentMember,
+                                        ),
+                                        showRemoveAssignment: chore
+                                            .canRemoveAssignment(
+                                              currentMember,
+                                            ),
+                                        showComplete: chore.canComplete(
+                                          currentMember,
+                                          todayChores: todayList,
+                                        ),
+                                        showDelete: chore.canDelete(
+                                          currentMember,
+                                        ),
+                                      ),
+                                    ),
+                                    if (completedToday.isNotEmpty) ...[
+                                      ...completedToday.map(
+                                        (chore) => ChoreCardComponent(
+                                          chore: chore,
+                                          assignedToName: _getMemberName(
+                                            chore.assignedTo,
+                                            members,
+                                          ),
+                                          completed: true,
+                                          isDueToday: _isChoreDueToday(
+                                            chore,
+                                            todayList,
+                                          ),
+                                          onToggle: _canToggleChoreCheckbox(
+                                            chore,
+                                            currentMember,
+                                            todayList,
+                                          )
+                                              ? () => _onToggleChoreFromCard(
+                                                  chore.id,
+                                                )
+                                              : null,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                );
+                              },
+                            )
+                          else ...[
+                            ...pendingAll.map(
                               (chore) => ChoreCardComponent(
                                 chore: chore,
                                 assignedToName: _getMemberName(
                                   chore.assignedTo,
                                   members,
                                 ),
-                                completed: true,
+                                completed: false,
+                                isDueToday: _isChoreDueToday(
+                                  chore,
+                                  todayListForDueCheck,
+                                ),
                                 onToggle: _canToggleChoreCheckbox(
                                   chore,
                                   currentMember,
-                                  todayList,
+                                  todayListForDueCheck,
                                 )
                                     ? () => _onToggleChoreFromCard(chore.id)
                                     : null,
+                                onEdit: chore.canEdit(currentMember)
+                                    ? () => setState(() {
+                                        _editingChore = chore;
+                                        _prefillAssigneeUserIdOnCreate = null;
+                                        _showChoreForm = true;
+                                      })
+                                    : null,
+                                onAssignToMe: chore.canAssignToMe(
+                                  currentMember,
+                                )
+                                    ? () => _onAssignIconPressed(
+                                        chore,
+                                        currentMember,
+                                      )
+                                    : null,
+                                onRemoveAssignment:
+                                    chore.canRemoveAssignment(currentMember)
+                                        ? () => setState(
+                                              () => _choreToRemoveAssignment =
+                                                  chore,
+                                            )
+                                        : null,
+                                onComplete: chore.canComplete(
+                                  currentMember,
+                                  todayChores: todayListForDueCheck,
+                                )
+                                    ? () => setState(
+                                          () => _choreToComplete = chore,
+                                        )
+                                    : null,
+                                onDelete: chore.canDelete(currentMember)
+                                    ? () => setState(
+                                          () => _deleteChoreId = chore.id,
+                                        )
+                                    : null,
+                                showEdit: chore.canEdit(currentMember),
+                                showAssignToMe: chore.canAssignToMe(
+                                  currentMember,
+                                ),
+                                showRemoveAssignment:
+                                    chore.canRemoveAssignment(currentMember),
+                                showComplete: chore.canComplete(
+                                  currentMember,
+                                  todayChores: todayListForDueCheck,
+                                ),
+                                showDelete: chore.canDelete(currentMember),
                               ),
                             ),
+                            if (completedAll.isNotEmpty) ...[
+
+                              ...completedAll.map(
+                                (chore) => ChoreCardComponent(
+                                  chore: chore,
+                                  assignedToName: _getMemberName(
+                                    chore.assignedTo,
+                                    members,
+                                  ),
+                                  completed: true,
+                                  isDueToday: _isChoreDueToday(
+                                    chore,
+                                    todayListForDueCheck,
+                                  ),
+                                  onToggle: _canToggleChoreCheckbox(
+                                    chore,
+                                    currentMember,
+                                    todayListForDueCheck,
+                                  )
+                                      ? () => _onToggleChoreFromCard(chore.id)
+                                      : null,
+                                ),
+                              ),
+                            ],
                           ],
                           if (_tab == ChoresTab.all &&
                               choresState.isLoadingMoreAllChores) ...[
@@ -651,15 +924,21 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
                           const SizedBox(height: 80),
                         ],
                       ),
+                      ),
                     ),
                     if (_showChoreForm)
                       ChoreFormDialogComponent(
                         formKey: _choreFormKey,
                         chore: _editingChore,
                         currentMember: currentMember,
+                        prefillAssigneeUserIdOnCreate:
+                            _editingChore == null
+                                ? _prefillAssigneeUserIdOnCreate
+                                : null,
                         onCancel: () => setState(() {
                           _showChoreForm = false;
                           _editingChore = null;
+                          _prefillAssigneeUserIdOnCreate = null;
                         }),
                         onSave: _handleSaveChore,
                       ),
@@ -729,6 +1008,9 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
     );
   }
 
+  bool _isChoreDueToday(Chore chore, List<Chore> todayApiList) =>
+      todayApiList.any((c) => c.id == chore.id);
+
   bool _canToggleChoreCheckbox(
     Chore chore,
     FamilyMember member,
@@ -741,15 +1023,4 @@ class _ChoresPageState extends ConsumerState<ChoresPage> {
     return inToday && (member.isAdmin() || chore.createdBy == member.id);
   }
 
-  List<Chore> _getTodayFilteredChores(
-    List<Chore> chores,
-    FamilyMember currentMember,
-  ) {
-    switch (_todayFilter) {
-      case TodayFilter.mine:
-        return chores.where((c) => c.assignedTo == currentMember.id).toList();
-      case TodayFilter.all:
-        return List<Chore>.from(chores);
-    }
-  }
 }

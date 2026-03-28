@@ -18,13 +18,17 @@ class ApiConstants {
     }
 
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8080/api/v1';
+      return 'http://10.0.2.2:8008/api/v1';
+      // return 'https://api.minhaserigrafia.com.br/chore-champ-api/api/v1';
+
     }
 
     final host = _devMachineHostFromEnv.isNotEmpty
         ? _devMachineHostFromEnv
         : kDefaultDevMachineHost;
-    return 'http://$host:8080/api/v1';
+    return 'http://$host:8008/api/v1';
+    // return 'https://api.minhaserigrafia.com.br/chore-champ-api/api/v1';
+
   }
 
   static const int codeUserNotFound = 404301;

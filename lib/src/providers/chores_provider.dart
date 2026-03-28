@@ -1,8 +1,11 @@
 import 'package:chore_champ_app/src/filters/all_chores_filters_provider.dart';
 import 'package:chore_champ_app/src/models/chore.dart';
+import 'package:chore_champ_app/src/models/family_member.dart';
 import 'package:chore_champ_app/src/models/paginated_chores_response.dart';
+import 'package:chore_champ_app/src/providers/home_today_chores_provider.dart';
 import 'package:chore_champ_app/src/providers/rewards_provider.dart';
 import 'package:chore_champ_app/src/providers/states/chores_state.dart';
+import 'package:chore_champ_app/src/providers/today_chores_assignee_filter_provider.dart';
 import 'package:chore_champ_app/src/repositories/chore_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,13 +15,61 @@ import 'repositories_provider.dart';
 import 'family_ranking_provider.dart';
 
 class ChoresNotifier extends AsyncNotifier<ChoresState> {
+  Future<List<Chore>> _fetchTodayWithAssigneeFilter(
+    ChoreRepository repo,
+    FamilyMember member,
+  ) async {
+    final filter = ref.read(todayChoresAssigneeFilterProvider);
+    final id = filter.toAssignedToUserIdQueryParam(member.id);
+    return repo.fetchTodayChores(assignedToUserId: id);
+  }
+
+  void _invalidateHomeTodayChores() {
+    ref.invalidate(homeTodayChoresProvider);
+  }
+
   @override
   Future<ChoresState> build() async {
-    final list = await ref.read(choreRepositoryProvider).fetchTodayChores();
+    final member = await ref.watch(currentMemberProvider.future);
+    final repo = ref.read(choreRepositoryProvider);
+    final list = await _fetchTodayWithAssigneeFilter(repo, member);
     return ChoresState(
       today: AsyncData(list),
       allPaginated: const AsyncData(null),
     );
+  }
+
+  Future<void> reloadTodayAssigneeFilter() async {
+    final current = state.valueOrNull;
+    final member = ref.read(currentMemberProvider).valueOrNull;
+    if (current == null || member == null) return;
+    state = AsyncData(
+      ChoresState(
+        today: const AsyncLoading(),
+        allPaginated: current.allPaginated,
+        isLoadingMoreAllChores: current.isLoadingMoreAllChores,
+      ),
+    );
+    try {
+      final repo = ref.read(choreRepositoryProvider);
+      final list = await _fetchTodayWithAssigneeFilter(repo, member);
+      _invalidateHomeTodayChores();
+      state = AsyncData(
+        ChoresState(
+          today: AsyncData(list),
+          allPaginated: current.allPaginated,
+          isLoadingMoreAllChores: current.isLoadingMoreAllChores,
+        ),
+      );
+    } catch (e, st) {
+      state = AsyncData(
+        ChoresState(
+          today: AsyncError(e, st),
+          allPaginated: current.allPaginated,
+          isLoadingMoreAllChores: current.isLoadingMoreAllChores,
+        ),
+      );
+    }
   }
 
   Future<void> loadAllChores() async {
@@ -217,7 +268,10 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
   Future<void> _refreshTodayOnly(ChoreRepository repo) async {
     final current = state.valueOrNull;
     if (current == null) return;
-    final newList = await repo.fetchTodayChores();
+    final member = ref.read(currentMemberProvider).valueOrNull;
+    if (member == null) return;
+    final newList = await _fetchTodayWithAssigneeFilter(repo, member);
+    _invalidateHomeTodayChores();
     state = AsyncData(
       ChoresState(
         today: AsyncData(newList),
@@ -227,13 +281,26 @@ class ChoresNotifier extends AsyncNotifier<ChoresState> {
     );
   }
 
+  Future<void> refreshTodayForPull() async {
+    final repo = ref.read(choreRepositoryProvider);
+    await _refreshTodayOnly(repo);
+  }
+
+  Future<void> refreshChoresTabForPull() async {
+    final repo = ref.read(choreRepositoryProvider);
+    await _refreshTodayAndAllChores(repo);
+  }
+
   Future<void> _refreshTodayAndAllChores(ChoreRepository repo) async {
     ref.read(allChoresFiltersProvider.notifier).setPage(1);
     final filters = ref.read(allChoresFiltersProvider);
+    final member = ref.read(currentMemberProvider).valueOrNull;
+    if (member == null) return;
     final results = await Future.wait([
-      repo.fetchTodayChores(),
+      _fetchTodayWithAssigneeFilter(repo, member),
       repo.fetchAllChores(filters),
     ]);
+    _invalidateHomeTodayChores();
     state = AsyncData(
       ChoresState(
         today: AsyncData(results[0] as List<Chore>),

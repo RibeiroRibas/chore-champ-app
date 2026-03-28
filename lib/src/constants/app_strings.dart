@@ -117,8 +117,8 @@ class AppStrings {
   static const String choresCreatedMultiple = 'Tarefas criadas.';
   static const String selectHint = 'Selecione';
   static const String allAssignees = 'Todos';
-  static const String filterRecurring = 'Recorrente';
-  static const String filterCompleted = 'Concluída';
+  static const String filterRecurring = 'Recorrentes';
+  static const String filterCompleted = 'Concluídas';
 
   // Achievements
   static const String achievements = 'Conquistas';

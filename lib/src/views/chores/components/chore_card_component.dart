@@ -9,6 +9,7 @@ class ChoreCardComponent extends StatelessWidget {
     required this.chore,
     required this.assignedToName,
     required this.completed,
+    required this.isDueToday,
     this.onToggle,
     this.onEdit,
     this.onAssignToMe,
@@ -25,6 +26,7 @@ class ChoreCardComponent extends StatelessWidget {
   final Chore chore;
   final String assignedToName;
   final bool completed;
+  final bool isDueToday;
   final VoidCallback? onToggle;
   final VoidCallback? onEdit;
   final VoidCallback? onAssignToMe;
@@ -173,7 +175,7 @@ class ChoreCardComponent extends StatelessWidget {
                                 minimumSize: const Size(24, 24),
                               ),
                             ),
-                          if (showComplete && !completed)
+                          if (isDueToday && showComplete && !completed)
                             IconButton(
                               onPressed: onComplete,
                               icon: const Icon(

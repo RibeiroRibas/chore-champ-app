@@ -10,10 +10,12 @@ class DashboardMyTasksComponent extends StatelessWidget {
     super.key,
     required this.myChores,
     this.onSeeAll,
+    this.onAddChore,
   });
 
   final List<Chore> myChores;
   final VoidCallback? onSeeAll;
+  final VoidCallback? onAddChore;
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +37,13 @@ class DashboardMyTasksComponent extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (myChores.isEmpty)
-          const EmptyChoresCardComponent()
+          EmptyChoresCardComponent(
+            actionLabel:
+                onAddChore != null ? AppStrings.addChore : null,
+            onActionPressed: onAddChore,
+          )
         else
           ...myChores
-              .take(3)
               .map(
                 (chore) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),

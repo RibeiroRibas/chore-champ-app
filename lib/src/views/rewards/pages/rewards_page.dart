@@ -6,6 +6,7 @@ import 'package:chore_champ_app/src/views/components/gradient_warm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:chore_champ_app/src/infra/page_pull_refresh.dart';
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/models/achievement.dart';
 import 'package:chore_champ_app/src/models/reward.dart';
@@ -130,12 +131,15 @@ class _RewardsPageState extends ConsumerState<RewardsPage> {
               data: (achievements) {
                 return Stack(
                   children: [
-                    SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 20,
-                      ),
-                      child: Column(
+                    RefreshIndicator(
+                      onRefresh: () => pullRefreshRewards(ref),
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
@@ -206,6 +210,7 @@ class _RewardsPageState extends ConsumerState<RewardsPage> {
                             }),
                           const SizedBox(height: 80),
                         ],
+                      ),
                       ),
                     ),
                     if (_dialogOpen)

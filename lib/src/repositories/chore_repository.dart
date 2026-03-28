@@ -13,9 +13,16 @@ class ChoreRepository {
 
   static const String _basePath = '/family/chores';
 
-  Future<List<Chore>> fetchTodayChores() async {
+  Future<List<Chore>> fetchTodayChores({int? assignedToUserId}) async {
     try {
-      final data = await _client.get<List<dynamic>>('$_basePath/today');
+      final query = <String, dynamic>{};
+      if (assignedToUserId != null) {
+        query['assigned_to_user_id'] = assignedToUserId;
+      }
+      final data = await _client.get<List<dynamic>>(
+        '$_basePath/today',
+        queryParameters: query.isEmpty ? null : query,
+      );
       return (data)
           .map((e) => Chore.fromApiJson(e as Map<String, dynamic>))
           .toList();
@@ -37,11 +44,9 @@ class ChoreRepository {
       if (filters.title.trim().isNotEmpty) {
         query['title'] = filters.title.trim();
       }
-      if (filters.isRecurring) {
-        query['is_recurring'] = true;
-      }
-      if (filters.completed) {
-        query['completed'] = true;
+      if (!filters.showAllChores) {
+        query['completed'] = filters.completed;
+        query['is_recurring'] = filters.isRecurring;
       }
       if (filters.assignedToUserId != null &&
           filters.assignedToUserId!.isNotEmpty) {

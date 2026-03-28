@@ -14,6 +14,12 @@ class AllChoresFiltersNotifier extends Notifier<AllChoresFilters> {
   void setCompleted(bool value) =>
       state = state.copyWith(completed: value, page: 1);
 
+  void clearRecurringAndCompletedFilters() => state = state.copyWith(
+        isRecurring: false,
+        completed: false,
+        page: 1,
+      );
+
   void setAssignedToUserId(String? value) =>
       state = state.copyWith(assignedToUserId: value, page: 1);
 

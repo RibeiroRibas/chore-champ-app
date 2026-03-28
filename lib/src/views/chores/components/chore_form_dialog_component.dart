@@ -16,6 +16,7 @@ class ChoreFormDialogComponent extends ConsumerStatefulWidget {
     required this.formKey,
     this.chore,
     required this.currentMember,
+    this.prefillAssigneeUserIdOnCreate,
     required this.onCancel,
     required this.onSave,
   });
@@ -23,6 +24,7 @@ class ChoreFormDialogComponent extends ConsumerStatefulWidget {
   final GlobalKey<FormState> formKey;
   final Chore? chore;
   final FamilyMember currentMember;
+  final String? prefillAssigneeUserIdOnCreate;
   final VoidCallback onCancel;
   final void Function(Chore chore) onSave;
 
@@ -63,7 +65,11 @@ class _ChoreFormDialogComponentState
       _completed = false;
       _isRecurring = false;
       _selectedDayIds = [];
-      if (widget.currentMember.isAdmin()) {
+      final prefillId = widget.prefillAssigneeUserIdOnCreate;
+      if (prefillId != null) {
+        _assignedToUserId = prefillId;
+        _assignedToUserIds = {prefillId};
+      } else if (widget.currentMember.isAdmin()) {
         _assignedToUserId = null;
         _assignedToUserIds = {};
       } else {
@@ -326,18 +332,23 @@ class _ChoreFormDialogComponentState
                   const SizedBox(height: 16),
                   CheckboxListTile(
                     value: _isRecurring,
-                    onChanged: (v) => setState(() => _isRecurring = v ?? false),
+                    onChanged: (v) => setState(() {
+                      _isRecurring = v ?? false;
+                      if (_isRecurring) _completed = false;
+                    }),
                     title: const Text(AppStrings.recurringChoreLabel),
                     contentPadding: EdgeInsets.zero,
                     controlAffinity: ListTileControlAffinity.leading,
                   ),
-                  CheckboxListTile(
-                    value: _completed,
-                    onChanged: (v) => setState(() => _completed = v ?? false),
-                    title: const Text(AppStrings.completed),
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
+                  if (!_isRecurring)
+                    CheckboxListTile(
+                      value: _completed,
+                      onChanged: (v) =>
+                          setState(() => _completed = v ?? false),
+                      title: const Text(AppStrings.completed),
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                    ),
                   if (_isRecurring) ...[
                     const SizedBox(height: 8),
                     Text(
@@ -428,13 +439,15 @@ class _ChoreFormDialogComponentState
         .map((id) => days.firstWhere((d) => d.id == id))
         .toList();
 
+    final completedForApi = _isRecurring ? false : _completed;
+
     if (_isEdit) {
       return widget.chore!.copyWith(
         title: _title.trim(),
         emoji: _emoji.trim().isEmpty ? '🧹' : _emoji.trim(),
         points: _points,
         assignedTo: _assignedToUserId,
-        completed: _completed,
+        completed: completedForApi,
         isRecurring: _isRecurring,
         recurrenceDays: recurrenceDays,
       );
@@ -448,7 +461,7 @@ class _ChoreFormDialogComponentState
       assignedTo: ids.length == 1 ? ids.first : null,
       assignedToUserIds: ids,
       createdBy: widget.currentMember.id,
-      completed: _completed,
+      completed: completedForApi,
       isRecurring: _isRecurring,
       recurrenceDays: recurrenceDays,
     );

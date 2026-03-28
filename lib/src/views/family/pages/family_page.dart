@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:chore_champ_app/src/constants/app_strings.dart';
+import 'package:chore_champ_app/src/infra/page_pull_refresh.dart';
 import 'package:chore_champ_app/src/infra/api_error_presentation.dart';
 import 'package:chore_champ_app/src/infra/success_snackbar.dart';
 import 'package:chore_champ_app/src/views/components/info_alert_dialog.dart';
@@ -139,12 +140,15 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
                       data: (ranking) {
                         return Stack(
                           children: [
-                            SingleChildScrollView(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 20,
-                              ),
-                              child: Column(
+                            RefreshIndicator(
+                              onRefresh: () => pullRefreshFamily(ref),
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 20,
+                                ),
+                                child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
@@ -226,6 +230,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
                                   const SizedBox(height: 80),
                                 ],
                               ),
+                            ),
                             ),
                             if (_dialogOpen)
                               MemberFormDialogComponent(

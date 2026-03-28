@@ -1,3 +1,9 @@
+class _AssigneeIdUnspecified {
+  const _AssigneeIdUnspecified();
+}
+
+const _assigneeIdUnspecified = _AssigneeIdUnspecified();
+
 class AllChoresFilters {
   const AllChoresFilters({
     this.title = '',
@@ -15,11 +21,13 @@ class AllChoresFilters {
   final int page;
   final int pageSize;
 
+  bool get showAllChores => !isRecurring && !completed;
+
   AllChoresFilters copyWith({
     String? title,
     bool? isRecurring,
     bool? completed,
-    String? assignedToUserId,
+    Object? assignedToUserId = _assigneeIdUnspecified,
     int? page,
     int? pageSize,
   }) {
@@ -27,7 +35,9 @@ class AllChoresFilters {
       title: title ?? this.title,
       isRecurring: isRecurring ?? this.isRecurring,
       completed: completed ?? this.completed,
-      assignedToUserId: assignedToUserId ?? this.assignedToUserId,
+      assignedToUserId: identical(assignedToUserId, _assigneeIdUnspecified)
+          ? this.assignedToUserId
+          : assignedToUserId as String?,
       page: page ?? this.page,
       pageSize: pageSize ?? this.pageSize,
     );

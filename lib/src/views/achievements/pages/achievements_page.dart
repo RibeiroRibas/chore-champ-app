@@ -1,6 +1,7 @@
 import 'package:chore_champ_app/src/constants/app_strings.dart';
 import 'package:chore_champ_app/src/providers/achievements_provider.dart';
 import 'package:chore_champ_app/src/providers/current_member_provider.dart';
+import 'package:chore_champ_app/src/infra/page_pull_refresh.dart';
 import 'package:chore_champ_app/src/views/achievements/components/achievement_card_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,45 +17,50 @@ class AchievementsPage extends ConsumerWidget {
     return currentMember.when(
       data: (currentMember) => achievementsAsync.when(
         data: (achievements) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
-                Text(
-                  AppStrings.achievements,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.85,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
+          return RefreshIndicator(
+            onRefresh: () => pullRefreshAchievements(ref),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Text(
+                    AppStrings.achievements,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  itemCount: achievements.length,
-                  itemBuilder: (context, i) {
-                    final a = achievements[i];
-                    final unlocked = currentMember.points >= a.requiredPoints;
-                    final progress =
-                        (currentMember.points / a.requiredPoints * 100).clamp(
-                          0.0,
-                          100.0,
-                        );
-                    return AchievementCardComponent(
-                      achievement: a,
-                      unlocked: unlocked,
-                      progress: progress,
-                      currentUserPoints: currentMember.points,
-                      acquiredTimes: a.acquiredTimes,
-                    );
-                  },
-                ),
-                const SizedBox(height: 80),
-              ],
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.85,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
+                    itemCount: achievements.length,
+                    itemBuilder: (context, i) {
+                      final a = achievements[i];
+                      final unlocked = currentMember.points >= a.requiredPoints;
+                      final progress =
+                          (currentMember.points / a.requiredPoints * 100).clamp(
+                            0.0,
+                            100.0,
+                          );
+                      return AchievementCardComponent(
+                        achievement: a,
+                        unlocked: unlocked,
+                        progress: progress,
+                        currentUserPoints: currentMember.points,
+                        acquiredTimes: a.acquiredTimes,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 80),
+                ],
+              ),
             ),
           );
         },
